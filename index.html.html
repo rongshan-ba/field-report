@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1A1D1F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Field Report">
+<title>Field Report — Construction Administration</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#15181B; --ink-2:#4A5157; --ink-3:#818A90;
+    --slab:#DFE3E0; --paper:#FFFFFF; --paper-2:#F6F7F5;
+    --rule:#C3CAC6; --rule-2:#E2E6E3;
+    --hv:#C7D92C; --hv-ink:#3E4700;
+    --red:#BF3126; --amber:#D98200; --green:#2C7A51; --indigo:#3B4CA0;
+    --shadow:0 1px 0 rgba(21,24,27,.10), 0 6px 18px -12px rgba(21,24,27,.45);
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--slab);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;
+    -webkit-text-size-adjust:100%;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;
+    color:var(--ink-3);display:block;margin:0 0 4px}
+  .dim{color:var(--ink-3)}
+
+  .topbar{position:sticky;top:0;z-index:40;background:var(--ink);color:#fff;
+    padding:calc(8px + env(safe-area-inset-top)) 14px 8px;display:flex;align-items:center;gap:12px;
+    border-bottom:3px solid var(--hv)}
+  .topbar .id{min-width:0;flex:1}
+  .topbar .id b{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+  .topbar .id span{display:block;font-size:11px;color:#9AA3A8;letter-spacing:.06em}
+
+  .btn{font:inherit;font-size:13px;font-weight:600;letter-spacing:.02em;background:var(--paper);
+    color:var(--ink);border:1px solid var(--ink);border-radius:2px;padding:9px 13px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px}
+  .btn:active{transform:translateY(1px)}
+  .btn--hv{background:var(--hv);border-color:var(--ink);color:var(--hv-ink);font-weight:700}
+  .btn--quiet{background:transparent;border-color:var(--rule);color:var(--ink-2)}
+  .btn--warn{border-color:var(--red);color:var(--red);font-weight:700}
+  .btn--sm{min-height:36px;padding:6px 10px;font-size:12px}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+    outline:3px solid var(--hv);outline-offset:1px}
+
+  .band{display:flex;align-items:baseline;gap:10px;margin:22px 0 8px}
+  .band h2{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin:0}
+  .band .hr{flex:1;height:0;border-top:1px solid var(--rule)}
+  .band .ct{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+
+  .sheet{background:var(--paper);border:1px solid var(--rule);box-shadow:var(--shadow)}
+  .grid{display:grid;grid-template-columns:1fr 1fr}
+  .cell{border-top:1px solid var(--rule-2);border-right:1px solid var(--rule-2);padding:9px 11px}
+  .cell:nth-child(2n){border-right:0}
+  .cell.full{grid-column:1/-1;border-right:0}
+  .grid .cell:nth-child(1),.grid .cell:nth-child(2){border-top:0}
+  input,textarea,select{font:inherit;width:100%;background:transparent;border:0;padding:0;
+    color:var(--ink);font-size:15px}
+  input::placeholder,textarea::placeholder{color:#B4BCC0}
+  textarea{resize:vertical;min-height:76px;line-height:1.5}
+  select{font-size:13px;font-weight:700;letter-spacing:.04em}
+  .val-mono{font-family:var(--mono);font-size:14px}
+
+  /* --- site & weather --- */
+  .wx__row{display:flex;gap:10px;align-items:center;padding:11px}
+  .wx__now{flex:1;min-width:0}
+  .wx__t{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1}
+  .wx__d{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wx__meta{font-family:var(--mono);font-size:11px;color:var(--ink-3);padding:8px 11px 10px;
+    border-top:1px dashed var(--rule);word-break:break-word}
+  .note{font-size:12px;line-height:1.5;color:var(--ink-2);background:#FFF8E6;
+    border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);padding:9px 11px}
+  .note b{color:var(--ink)}
+  .note--hide{display:none}
+  .unit-tog{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+  .unit-tog button{font:inherit;font-family:var(--mono);font-size:11px;font-weight:700;
+    background:var(--paper);border:0;padding:7px 8px;cursor:pointer;color:var(--ink-3)}
+  .unit-tog button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .lrow{display:flex;gap:6px;align-items:center}
+  .lrow input{border:1px solid var(--rule-2);padding:8px 9px;font-size:14px;border-radius:2px;min-width:0}
+  .hits{margin-top:6px}
+  .hits button{display:block;width:100%;text-align:left;font:inherit;font-size:13px;
+    background:var(--paper-2);border:1px solid var(--rule-2);border-radius:2px;
+    padding:8px 9px;margin-bottom:4px;cursor:pointer;color:var(--ink)}
+  .hits button b{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-3);font-family:var(--mono)}
+
+  /* --- observation slip --- */
+  .slip{background:var(--paper);border:1px solid var(--rule);box-shadow:var(--shadow);
+    margin:0 0 16px;position:relative}
+  .slip::before{content:"";position:absolute;left:0;right:0;top:-1px;height:4px;
+    background:repeating-linear-gradient(90deg,var(--rule) 0 5px,transparent 5px 10px)}
+  .slip--gone{display:none}
+  .slip__hd{display:flex;align-items:center;gap:9px;padding:12px 11px 9px}
+  .slip__num{font-family:var(--mono);font-size:13px;font-weight:700;background:var(--ink);
+    color:#fff;padding:3px 7px;letter-spacing:.05em}
+  .slip__hd select{flex:1;min-width:0;text-transform:uppercase;font-size:12px;letter-spacing:.08em}
+  .tag{width:10px;height:26px;flex:none;background:var(--ink-3)}
+  .icons{display:flex;gap:4px}
+  .ibtn{font:inherit;background:transparent;border:1px solid var(--rule-2);border-radius:2px;
+    width:34px;height:34px;cursor:pointer;color:var(--ink-2);font-size:14px;line-height:1;
+    display:flex;align-items:center;justify-content:center}
+  .ibtn:active{background:var(--paper-2)}
+
+  /* photo strip: 1 photo goes full width, 2+ tile */
+  .shots{display:grid;gap:3px;grid-template-columns:repeat(3,1fr);
+    background:var(--paper-2);border-top:1px solid var(--rule-2);
+    border-bottom:1px solid var(--rule-2);padding:3px}
+  .shots--one{grid-template-columns:1fr}
+  .shots--empty{display:none}
+  .shot{position:relative;background:#20252a;overflow:hidden;aspect-ratio:1/1}
+  .shots--one .shot{aspect-ratio:4/3}
+  .shot img{display:block;width:100%;height:100%;object-fit:cover;cursor:pointer}
+  .shots--one .shot img{object-fit:contain}
+  .shot__x{position:absolute;top:3px;right:3px;width:30px;height:30px;border-radius:50%;
+    border:0;background:rgba(21,24,27,.72);color:#fff;font-size:15px;line-height:1;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0}
+  .shot__n{position:absolute;left:0;bottom:0;font-family:var(--mono);font-size:9.5px;
+    background:rgba(21,24,27,.72);color:#fff;padding:2px 5px;letter-spacing:.06em}
+  .shotbar{display:flex;gap:6px;padding:8px 11px;border-bottom:1px solid var(--rule-2);
+    align-items:center}
+  .shotbar .ct{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);
+    letter-spacing:.08em;margin-left:auto}
+
+  .field{padding:9px 11px;border-bottom:1px solid var(--rule-2)}
+  .ta{position:relative}
+  .ta textarea{padding-right:52px}
+  .mic{position:absolute;right:6px;top:2px;width:42px;height:42px;border-radius:50%;
+    border:1px solid var(--ink);background:var(--paper);cursor:pointer;font-size:17px;line-height:1;
+    display:flex;align-items:center;justify-content:center}
+  .mic[data-on="1"]{background:var(--hv);animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(199,217,44,.45)}}
+  .slip__data{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);padding:8px 11px;
+    background:var(--paper-2);display:flex;flex-wrap:wrap;gap:4px 12px;letter-spacing:.02em}
+  .slip__data b{font-weight:700;color:var(--ink-3);letter-spacing:.1em}
+
+  .empty{border:1px dashed var(--rule);background:rgba(255,255,255,.5);padding:26px 18px;
+    text-align:center;color:var(--ink-2);font-size:14px}
+  .empty b{display:block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink);margin-bottom:6px}
+
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--ink);
+    padding:9px 14px calc(9px + env(safe-area-inset-bottom));display:flex;gap:8px}
+  .dock .btn{flex:1}
+  .dock .btn--quiet{background:#262B2F;border-color:#3C444A;color:#E6EAEC}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(96px + env(safe-area-inset-bottom));z-index:60;background:var(--ink);color:#fff;
+    padding:10px 15px;font-size:13px;border-radius:2px;box-shadow:var(--shadow);max-width:92vw;
+    border-left:4px solid var(--hv);display:flex;align-items:center;gap:14px}
+  .toast .btn{background:var(--hv);border-color:var(--hv);color:var(--hv-ink);min-height:32px;
+    padding:5px 11px;font-size:12px;font-weight:700;flex:none}
+  .lightbox{position:fixed;inset:0;background:rgba(10,12,14,.95);z-index:80;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:12px}
+  .lightbox img{max-width:100%;max-height:82vh;object-fit:contain}
+  .lightbox .lbnav{display:flex;gap:10px;align-items:center}
+  .lightbox .lbnav .mono{color:#C9D0D4;font-size:12px}
+  .foot{padding:18px 0 6px;font-size:12px;color:var(--ink-2);line-height:1.6}
+  .foot h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
+  .foot code{font-family:var(--mono);font-size:11px}
+  .rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media print{
+    .topbar,.dock,.foot,.icons,.mic,.unit-tog,.shot__x,.shotbar,.note{display:none!important}
+    body{background:#fff;padding:0}
+    .slip{break-inside:avoid;box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="id">
+    <b id="tbProj">Untitled project</b>
+    <span class="mono" id="tbMeta">RPT — · —</span>
+  </div>
+  <button class="btn btn--hv btn--sm" id="btnPdf">Export PDF</button>
+</header>
+
+<div class="wrap">
+
+  <div class="band"><h2>Report</h2><div class="hr"></div></div>
+  <section class="sheet">
+    <div class="grid">
+      <div class="cell"><label class="lbl" for="m_projectName">Project</label>
+        <input id="m_projectName" data-k="projectName" placeholder="Project name"></div>
+      <div class="cell"><label class="lbl" for="m_projectNo">Project no.</label>
+        <input id="m_projectNo" class="val-mono" data-k="projectNo" placeholder="0000"></div>
+      <div class="cell"><label class="lbl" for="m_reportNo">Report no.</label>
+        <input id="m_reportNo" class="val-mono" data-k="reportNo" placeholder="001"></div>
+      <div class="cell"><label class="lbl" for="m_date">Date of visit</label>
+        <input id="m_date" class="val-mono" data-k="date" type="date"></div>
+      <div class="cell"><label class="lbl" for="m_arrive">Arrived</label>
+        <input id="m_arrive" class="val-mono" data-k="arrive" type="time"></div>
+      <div class="cell"><label class="lbl" for="m_depart">Departed</label>
+        <input id="m_depart" class="val-mono" data-k="depart" type="time"></div>
+      <div class="cell"><label class="lbl" for="m_author">Observed by</label>
+        <input id="m_author" data-k="author" placeholder="Name, title"></div>
+      <div class="cell"><label class="lbl" for="m_firm">Firm</label>
+        <input id="m_firm" data-k="firm" placeholder="Architect of record"></div>
+      <div class="cell full"><label class="lbl" for="m_contractor">Contractor</label>
+        <input id="m_contractor" data-k="contractor" placeholder="General contractor"></div>
+      <div class="cell full"><label class="lbl" for="m_present">Present on site</label>
+        <input id="m_present" data-k="present" placeholder="Names and companies"></div>
+      <div class="cell full"><label class="lbl" for="m_notes">General notes</label>
+        <textarea id="m_notes" data-k="notes" placeholder="Purpose of visit, work in progress, trades on site, schedule status…"></textarea></div>
+    </div>
+  </section>
+
+  <div class="band"><h2>Site &amp; weather</h2><div class="hr"></div>
+    <div class="unit-tog" role="group" aria-label="Units">
+      <button id="uUS" aria-pressed="true">°F</button><button id="uSI" aria-pressed="false">°C</button>
+    </div>
+  </div>
+  <section class="sheet">
+    <div class="wx__row">
+      <div class="wx__now">
+        <div class="wx__t" id="wxTemp">—</div>
+        <div class="wx__d" id="wxDesc">No site location yet</div>
+      </div>
+      <button class="btn btn--sm" id="btnLoc">Use my location</button>
+    </div>
+    <div class="wx__meta" id="wxMeta">Set the site location and the weather fills in automatically — for the report and for every photo, matched to the hour it was taken.</div>
+
+    <div class="note note--hide" id="locNote"></div>
+
+    <div class="field">
+      <label class="lbl" for="placeQ">Or find the site by address</label>
+      <div class="lrow">
+        <input id="placeQ" placeholder="123 Main St, Morrisville VT" enterkeyhint="search">
+        <button class="btn btn--sm" id="btnFind">Search</button>
+      </div>
+      <div class="hits" id="placeHits"></div>
+    </div>
+    <div class="field">
+      <label class="lbl" for="latIn">Or enter coordinates</label>
+      <div class="lrow">
+        <input id="latIn" class="val-mono" inputmode="decimal" placeholder="44.55987">
+        <input id="lonIn" class="val-mono" inputmode="decimal" placeholder="-72.59842">
+        <button class="btn btn--sm" id="btnSetXY">Set</button>
+      </div>
+    </div>
+    <div class="field" style="border-bottom:0">
+      <label class="lbl" for="m_wxNote">Weather as reported (auto-filled, editable — this prints on the PDF)</label>
+      <input id="m_wxNote" data-k="wxNote" placeholder="e.g. 71°F, partly cloudy, light wind, ground dry">
+    </div>
+  </section>
+
+  <div class="band"><h2>Observations</h2><div class="hr"></div><div class="ct" id="obsCount">00</div></div>
+  <section id="obsList"></section>
+  <div class="empty" id="empty">
+    <b>No observations yet</b>
+    <strong>Take photo</strong> starts a new numbered observation. <strong>Add photos</strong> puts
+    everything you select into one observation — for several angles of the same condition.
+  </div>
+
+  <div class="rowbtns">
+    <button class="btn btn--quiet btn--sm" id="btnSave">Save report file</button>
+    <button class="btn btn--quiet btn--sm" id="btnOpen">Open report file</button>
+    <button class="btn btn--quiet btn--sm" id="btnClear">Start new report</button>
+  </div>
+
+  <div class="foot">
+    <h3>Running this in the field</h3>
+    Phone GPS, the microphone, and weather lookups only work when the page is served from an
+    <code>https://</code> address and opened as its own page — not inside an app's preview frame.
+    Put the file on GitHub Pages, Netlify Drop, or your office server, open it in Safari or Chrome,
+    then add it to your home screen. Weather comes from Open-Meteo, address lookups from
+    OpenStreetMap. Work in progress lives in this tab only — <strong>Save report file</strong> before
+    you close it.
+  </div>
+</div>
+
+<div class="dock">
+  <button class="btn btn--hv" id="btnCam">Take photo</button>
+  <button class="btn btn--quiet" id="btnLib">Add photos</button>
+  <button class="btn btn--quiet" id="btnNote" title="Observation without a photo">Note</button>
+</div>
+
+<input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fileLib" accept="image/*" multiple hidden>
+<input type="file" id="fileJson" accept=".json,application/json" hidden>
+
+<script>
+"use strict";
+/* ============================================================
+   Field Report — construction administration
+   v2: multi-photo observations, three ways to set site location,
+       automatic weather per observation.
+   ============================================================ */
+
+const CATS = [
+  ["Observation",        "#4A5157"],
+  ["Work in progress",   "#3B4CA0"],
+  ["Conforming",         "#2C7A51"],
+  ["Deficiency",         "#BF3126"],
+  ["Safety concern",     "#D98200"],
+  ["RFI / clarification","#6D2E8C"],
+  ["Delay / weather",    "#7A6A2C"],
+  ["Action required",    "#BF3126"]
+];
+const CATC = Object.fromEntries(CATS);
+
+const WMO = {0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Freezing fog",
+51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",56:"Light freezing drizzle",57:"Freezing drizzle",
+61:"Light rain",63:"Rain",65:"Heavy rain",66:"Light freezing rain",67:"Freezing rain",
+71:"Light snow",73:"Snow",75:"Heavy snow",77:"Snow grains",80:"Light rain showers",81:"Rain showers",
+82:"Violent rain showers",85:"Light snow showers",86:"Snow showers",95:"Thunderstorm",
+96:"Thunderstorm, slight hail",99:"Thunderstorm, heavy hail"};
+
+const state = {
+  meta:{projectName:"",projectNo:"",reportNo:"",date:todayISO(),arrive:"",depart:"",author:"",
+        firm:"",contractor:"",present:"",notes:"",wxNote:""},
+  site:{lat:null,lon:null,address:""},
+  wxNow:null,
+  units:"us",
+  obs:[]
+};
+const cards = new Map();
+const wxCache = new Map();
+let seq = 0;
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+function todayISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);}
+function pad(n){return String(n).padStart(2,"0");}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function toast(msg,ms=3200){
+  const t=document.createElement("div");t.className="toast";
+  const s=document.createElement("span");s.textContent=msg;t.appendChild(s);
+  document.body.appendChild(t);setTimeout(()=>t.remove(),ms);
+  return t;
+}
+/* stands in for confirm(), which embedded frames block */
+function toastAction(msg,label,fn,ms=7000){
+  const t=toast(msg,ms);
+  const b=document.createElement("button");
+  b.className="btn";b.type="button";b.textContent=label;
+  b.addEventListener("click",()=>{t.remove();fn();});
+  t.appendChild(b);
+  return t;
+}
+function tempU(){return state.units==="us"?"°F":"°C";}
+function windU(){return state.units==="us"?"mph":"km/h";}
+function fmtTemp(v){return v==null?"—":Math.round(v)+tempU();}
+function localStamp(d){
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());
+}
+function prettyTime(iso){ if(!iso) return "—"; const [d,t]=iso.split("T"); return d+" "+t; }
+function clockOnly(iso){ return iso&&iso.includes("T") ? iso.split("T")[1] : ""; }
+function coordStr(lat,lon){ return (lat==null||lon==null)?"—":Number(lat).toFixed(5)+", "+Number(lon).toFixed(5); }
+
+/* ---------------- meta form ---------------- */
+document.querySelectorAll("[data-k]").forEach(inp=>{
+  inp.value = state.meta[inp.dataset.k] ?? "";
+  inp.addEventListener("input",()=>{ state.meta[inp.dataset.k]=inp.value; paintTopbar(); });
+});
+function paintTopbar(){
+  $("#tbProj").textContent = state.meta.projectName || "Untitled project";
+  const bits=["RPT "+(state.meta.reportNo||"—"), state.meta.date||"—"];
+  if(state.meta.projectNo) bits.push("#"+state.meta.projectNo);
+  $("#tbMeta").textContent=bits.join(" · ");
+}
+function syncMetaForm(){
+  document.querySelectorAll("[data-k]").forEach(i=>{ i.value = state.meta[i.dataset.k] ?? ""; });
+  paintTopbar();
+}
+paintTopbar();
+
+/* ---------------- units ---------------- */
+$("#uUS").addEventListener("click",()=>setUnits("us"));
+$("#uSI").addEventListener("click",()=>setUnits("si"));
+function setUnits(u){
+  if(state.units===u) return;
+  state.units=u;
+  $("#uUS").setAttribute("aria-pressed",String(u==="us"));
+  $("#uSI").setAttribute("aria-pressed",String(u==="si"));
+  wxCache.clear();
+  if(state.site.lat!=null) loadSiteWeather();
+  state.obs.forEach(o=>{ if(o.lat!=null){ o.wx=null; attachWeather(o); } });
+}
+
+/* ============================================================
+   EXIF: GPS + original timestamp
+   ============================================================ */
+async function readExif(file){
+  try{
+    const buf=await file.slice(0,512*1024).arrayBuffer();
+    const v=new DataView(buf);
+    if(v.byteLength<12 || v.getUint16(0)!==0xFFD8) return null;
+    let off=2, tiff=-1;
+    while(off+4<v.byteLength){
+      if(v.getUint8(off)!==0xFF) break;
+      const marker=v.getUint8(off+1), size=v.getUint16(off+2);
+      if(marker===0xE1 && off+10<v.byteLength){
+        let s=""; for(let i=0;i<4;i++) s+=String.fromCharCode(v.getUint8(off+4+i));
+        if(s==="Exif"){ tiff=off+10; break; }
+      }
+      if(marker===0xDA) break;
+      off+=2+size;
+    }
+    if(tiff<0) return null;
+    const le=v.getUint16(tiff)===0x4949;
+    const u16=o=>v.getUint16(o,le), u32=o=>v.getUint32(o,le);
+    if(u16(tiff+2)!==0x2A) return null;
+    const ifd0=tiff+u32(tiff+4);
+    function entries(base){
+      const out={};
+      if(base+2>v.byteLength) return out;
+      const n=u16(base);
+      for(let i=0;i<n;i++){
+        const e=base+2+i*12;
+        if(e+12>v.byteLength) break;
+        out[u16(e)]={type:u16(e+2),count:u32(e+4),ptr:e+8};
+      }
+      return out;
+    }
+    const SZ={1:1,2:1,3:2,4:4,5:8,7:1,9:4,10:8};
+    function val(en){
+      if(!en) return null;
+      const size=(SZ[en.type]||1)*en.count;
+      const p = size>4 ? tiff+u32(en.ptr) : en.ptr;
+      if(p<0||p+size>v.byteLength) return null;
+      if(en.type===2){
+        let s=""; for(let i=0;i<en.count;i++){const c=v.getUint8(p+i); if(!c)break; s+=String.fromCharCode(c);} return s;
+      }
+      const arr=[];
+      for(let i=0;i<en.count;i++){
+        const q=p+i*SZ[en.type];
+        if(en.type===3) arr.push(u16(q));
+        else if(en.type===4) arr.push(u32(q));
+        else if(en.type===5) arr.push(u32(q+4)===0?0:u32(q)/u32(q+4));
+        else if(en.type===10) arr.push(v.getInt32(q+4,le)===0?0:v.getInt32(q,le)/v.getInt32(q+4,le));
+        else if(en.type===1||en.type===7) arr.push(v.getUint8(q));
+      }
+      return en.count===1?arr[0]:arr;
+    }
+    const e0=entries(ifd0);
+    const out={lat:null,lon:null,alt:null,taken:null};
+    if(e0[0x8769]){
+      const ex=entries(tiff+u32(e0[0x8769].ptr));
+      const dt=val(ex[0x9003])||val(ex[0x9004]);
+      if(dt && /^\d{4}:\d{2}:\d{2}/.test(dt)){
+        const [dp,tp]=dt.trim().split(" ");
+        out.taken=dp.replace(/:/g,"-")+"T"+((tp||"00:00:00").slice(0,5));
+      }
+    }
+    if(e0[0x8825]){
+      const g=entries(tiff+u32(e0[0x8825].ptr));
+      const dms=t=>{const a=val(g[t]); return Array.isArray(a)?a[0]+a[1]/60+a[2]/3600:null;};
+      const la=dms(0x0002), lo=dms(0x0004);
+      if(la!=null&&lo!=null&&isFinite(la)&&isFinite(lo)){
+        out.lat=(val(g[0x0001])||"N").trim().toUpperCase()==="S" ? -la : la;
+        out.lon=(val(g[0x0003])||"E").trim().toUpperCase()==="W" ? -lo : lo;
+      }
+      const alt=val(g[0x0006]);
+      if(typeof alt==="number"&&isFinite(alt)) out.alt = val(g[0x0005])===1 ? -alt : alt;
+    }
+    return out;
+  }catch(e){ return null; }
+}
+
+/* ============================================================
+   Image decode + downscale
+   ============================================================ */
+async function decode(file){
+  try{ return await createImageBitmap(file,{imageOrientation:"from-image"}); }catch(_){}
+  try{ return await createImageBitmap(file); }catch(_){}
+  return await new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);res(img);};
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("decode"));};
+    img.src=url;
+  });
+}
+function resample(src,maxDim,quality){
+  const w0=src.width||src.naturalWidth, h0=src.height||src.naturalHeight;
+  const k=Math.min(1,maxDim/Math.max(w0,h0));
+  const w=Math.max(1,Math.round(w0*k)), h=Math.max(1,Math.round(h0*k));
+  const c=document.createElement("canvas");c.width=w;c.height=h;
+  const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,w,h);
+  g.imageSmoothingQuality="high";g.drawImage(src,0,0,w,h);
+  return {url:c.toDataURL("image/jpeg",quality),w,h};
+}
+
+/* ============================================================
+   Location — GPS, address search, or typed coordinates
+   ============================================================ */
+function locBlocker(){
+  if(!("geolocation" in navigator)) return "This browser has no location feature.";
+  if(!window.isSecureContext)
+    return "Location needs an https:// address. This page is open from a local file, so the phone won't share GPS.";
+  try{ if(window.self!==window.top)
+    return "This preview frame blocks GPS. Open the file as its own page in Safari or Chrome and it will work.";
+  }catch(e){
+    return "This preview frame blocks GPS. Open the file as its own page in Safari or Chrome and it will work.";
+  }
+  return null;
+}
+function showLocNote(html){
+  const n=$("#locNote");
+  if(!html){ n.classList.add("note--hide"); n.innerHTML=""; return; }
+  n.classList.remove("note--hide"); n.innerHTML=html;
+}
+function getPosition(timeout=15000){
+  return new Promise((res,rej)=>{
+    navigator.geolocation.getCurrentPosition(
+      p=>res({lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy}),
+      err=>rej(err),
+      {enableHighAccuracy:true,timeout,maximumAge:30000}
+    );
+  });
+}
+$("#btnLoc").addEventListener("click",async()=>{
+  const blocked=locBlocker();
+  if(blocked){
+    showLocNote("<b>Can't reach GPS.</b> "+esc(blocked)+
+      " Meanwhile, search the address or type coordinates below — weather works either way.");
+    return;
+  }
+  const b=$("#btnLoc"); b.disabled=true; b.textContent="Locating…";
+  try{
+    const p=await getPosition();
+    showLocNote("");
+    await setSite(p.lat,p.lon,"");
+    toast("Site location set from GPS.");
+  }catch(err){
+    const code=err&&err.code;
+    if(code===1){
+      showLocNote("<b>Location permission was denied.</b> On iPhone: Settings → Privacy &amp; Security → "+
+        "Location Services → on, then Safari Websites → While Using the App. Also check the "+
+        "<strong>aA</strong> menu in Safari's address bar → Website Settings → Location → Allow. "+
+        "On Android Chrome: tap the lock icon in the address bar → Permissions → Location. "+
+        "Or just search the address below — that sets the site and the weather without GPS.");
+    }else if(code===2){
+      showLocNote("<b>No position fix.</b> The phone couldn't reach GPS or wi-fi positioning. "+
+        "Try again outdoors, or search the address below.");
+    }else if(code===3){
+      showLocNote("<b>Location timed out.</b> Try again, or search the address below.");
+    }else{
+      showLocNote("<b>Location unavailable.</b> Search the address or enter coordinates below.");
+    }
+  }finally{ b.disabled=false; b.textContent="Use my location"; }
+});
+
+/* address search: OpenStreetMap first (handles street addresses),
+   Open-Meteo geocoder as backup (place names) */
+async function geocode(q){
+  try{
+    const u="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&q="+encodeURIComponent(q);
+    const r=await fetch(u,{headers:{"Accept":"application/json"}});
+    if(r.ok){
+      const d=await r.json();
+      if(Array.isArray(d)&&d.length)
+        return d.map(x=>({label:x.display_name,lat:+x.lat,lon:+x.lon}));
+    }
+  }catch(e){}
+  try{
+    const u="https://geocoding-api.open-meteo.com/v1/search?count=5&language=en&format=json&name="+encodeURIComponent(q);
+    const r=await fetch(u);
+    if(r.ok){
+      const d=await r.json();
+      if(d&&d.results) return d.results.map(x=>({
+        label:[x.name,x.admin1,x.country].filter(Boolean).join(", "),lat:x.latitude,lon:x.longitude}));
+    }
+  }catch(e){}
+  return [];
+}
+async function runSearch(){
+  const q=$("#placeQ").value.trim();
+  if(!q) return;
+  const hits=$("#placeHits");
+  hits.innerHTML='<div class="dim" style="font-size:12px;padding:4px 0">Searching…</div>';
+  const res=await geocode(q);
+  if(!res.length){
+    hits.innerHTML='<div class="dim" style="font-size:12px;padding:4px 0">No match. Try a nearby intersection or town, or enter coordinates.</div>';
+    return;
+  }
+  hits.innerHTML="";
+  res.forEach(r=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.innerHTML="<b>"+r.lat.toFixed(4)+", "+r.lon.toFixed(4)+"</b>"+esc(r.label);
+    b.addEventListener("click",async()=>{
+      hits.innerHTML=""; $("#placeQ").value="";
+      showLocNote("");
+      await setSite(r.lat,r.lon,r.label);
+      toast("Site set to "+r.label.split(",")[0]+".");
+    });
+    hits.appendChild(b);
+  });
+}
+$("#btnFind").addEventListener("click",runSearch);
+$("#placeQ").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); runSearch(); } });
+$("#btnSetXY").addEventListener("click",async()=>{
+  const la=parseFloat($("#latIn").value), lo=parseFloat($("#lonIn").value);
+  if(!isFinite(la)||!isFinite(lo)||Math.abs(la)>90||Math.abs(lo)>180){
+    toast("Enter a latitude between -90 and 90, and a longitude between -180 and 180.");
+    return;
+  }
+  showLocNote("");
+  await setSite(la,lo,"");
+  toast("Site location set.");
+});
+
+/* ============================================================
+   Weather — fetched automatically whenever coordinates are known
+   ============================================================ */
+async function reverseGeocode(lat,lon){
+  try{
+    const r=await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+lat+"&longitude="+lon+"&localityLanguage=en");
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    return [d.locality||d.city,d.principalSubdivision,d.countryCode].filter(Boolean).join(", ");
+  }catch(e){ return ""; }
+}
+function series(lat,lon){
+  const key=Number(lat).toFixed(2)+","+Number(lon).toFixed(2)+"|"+state.units;
+  if(wxCache.has(key)) return wxCache.get(key);
+  const u=new URL("https://api.open-meteo.com/v1/forecast");
+  u.search=new URLSearchParams({
+    latitude:Number(lat).toFixed(4), longitude:Number(lon).toFixed(4),
+    hourly:"temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code",
+    current:"temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code",
+    past_days:"92", forecast_days:"2", timezone:"auto",
+    temperature_unit: state.units==="us"?"fahrenheit":"celsius",
+    wind_speed_unit: state.units==="us"?"mph":"kmh",
+    precipitation_unit: state.units==="us"?"inch":"mm"
+  }).toString();
+  const p=fetch(u).then(r=>{ if(!r.ok) throw new Error("weather service returned "+r.status); return r.json(); });
+  wxCache.set(key,p);
+  p.catch(()=>wxCache.delete(key));
+  return p;
+}
+function atHour(data,stamp){
+  const H=data&&data.hourly;
+  if(!H||!H.time||!H.time.length) return null;
+  const target=Date.parse(stamp.length<=16?stamp+":00":stamp);
+  let best=0,bd=Infinity;
+  for(let i=0;i<H.time.length;i++){
+    const d=Math.abs(Date.parse(H.time[i]+":00")-target);
+    if(d<bd){bd=d;best=i;}
+  }
+  if(bd>1000*60*90) return null;
+  return {temp:H.temperature_2m?.[best], rh:H.relative_humidity_2m?.[best],
+          wind:H.wind_speed_10m?.[best], precip:H.precipitation?.[best],
+          code:H.weather_code?.[best], hour:H.time[best]};
+}
+function wxText(w){
+  if(!w) return "";
+  const p=[fmtTemp(w.temp), WMO[w.code]||("code "+w.code)];
+  if(w.wind!=null) p.push("wind "+Math.round(w.wind)+" "+windU());
+  if(w.rh!=null) p.push("RH "+Math.round(w.rh)+"%");
+  if(w.precip) p.push("precip "+w.precip+(state.units==="us"?" in":" mm"));
+  return p.join(", ");
+}
+
+async function setSite(lat,lon,label){
+  state.site.lat=lat; state.site.lon=lon;
+  state.site.address=label||"";
+  $("#latIn").value=Number(lat).toFixed(5);
+  $("#lonIn").value=Number(lon).toFixed(5);
+  $("#wxMeta").textContent=coordStr(lat,lon)+" · fetching conditions…";
+  if(!state.site.address) state.site.address=await reverseGeocode(lat,lon);
+  await loadSiteWeather();
+  backfillLocation();
+}
+async function loadSiteWeather(){
+  const {lat,lon}=state.site;
+  if(lat==null) return;
+  try{
+    const d=await series(lat,lon);
+    const stamp=(state.meta.date&&state.meta.arrive) ? state.meta.date+"T"+state.meta.arrive : localStamp(new Date());
+    const w=atHour(d,stamp) || (d.current&&{temp:d.current.temperature_2m,rh:d.current.relative_humidity_2m,
+      wind:d.current.wind_speed_10m,precip:d.current.precipitation,code:d.current.weather_code,hour:d.current.time});
+    state.wxNow=w;
+    $("#wxTemp").textContent=fmtTemp(w&&w.temp);
+    $("#wxDesc").textContent=w?(WMO[w.code]||"—"):"—";
+    $("#wxMeta").textContent=[state.site.address,coordStr(lat,lon),
+      w?("at "+prettyTime(w.hour)+" · "+wxText(w)):""].filter(Boolean).join(" · ");
+    if(w){
+      state.meta.wxNote=wxText(w);
+      $("#m_wxNote").value=state.meta.wxNote;
+    }
+  }catch(e){
+    $("#wxMeta").textContent=coordStr(lat,lon)+" · weather lookup failed ("+e.message+")";
+    showLocNote("<b>Weather lookup failed.</b> Embedded preview frames often block outside requests. "+
+      "Open the file as its own page and it will fetch, or type the conditions in the field below.");
+  }
+}
+/* any observation still missing coordinates inherits the site's */
+function backfillLocation(){
+  state.obs.forEach(o=>{
+    if(o.lat==null && state.site.lat!=null){
+      o.lat=state.site.lat; o.lon=state.site.lon; o.gpsFrom="site";
+      o.address=state.site.address;
+      attachWeather(o);
+    }else if(o.lat!=null && !o.wx){
+      attachWeather(o);
+    }
+  });
+}
+async function attachWeather(o){
+  if(o.lat==null) return;
+  try{
+    const d=await series(o.lat,o.lon);
+    o.wx=atHour(d,o.taken||localStamp(new Date()));
+    if(!o.address) o.address=await reverseGeocode(o.lat,o.lon);
+    paintData(o);
+  }catch(e){}
+}
+
+/* ============================================================
+   Observations — each holds any number of photos
+   ============================================================ */
+$("#btnCam").addEventListener("click",()=>$("#fileCam").click());
+$("#btnLib").addEventListener("click",()=>$("#fileLib").click());
+$("#btnNote").addEventListener("click",()=>{ const o=addObs({}); focusComment(o); });
+/* camera: one shot, one new observation */
+$("#fileCam").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value="";
+  if(!f) return;
+  const o=addObs({});
+  await addPhotos(o,[f]);
+});
+/* library: everything selected lands in ONE observation */
+$("#fileLib").addEventListener("change",async e=>{
+  const files=[...e.target.files]; e.target.value="";
+  if(!files.length) return;
+  const o=addObs({});
+  await addPhotos(o,files);
+  if(files.length>1) toast(files.length+" photos in observation "+pad(state.obs.indexOf(o)+1)+".");
+});
+
+async function addPhotos(o,files){
+  for(const f of files){
+    try{
+      const ex=await readExif(f);
+      const bmp=await decode(f);
+      const p={ img:resample(bmp,1600,0.82), thumb:resample(bmp,760,0.78).url,
+                filename:f.name, taken:(ex&&ex.taken)||localStamp(new Date(f.lastModified||Date.now())),
+                lat:ex?ex.lat:null, lon:ex?ex.lon:null };
+      if(bmp.close) bmp.close();
+      o.photos.push(p);
+      /* the observation takes its time and position from the first photo that has them */
+      if(o.photos.length===1 && p.taken) o.taken=p.taken;
+      if(o.lat==null && p.lat!=null){
+        o.lat=p.lat; o.lon=p.lon; o.alt=ex?ex.alt:null; o.gpsFrom="photo"; o.address="";
+      }
+    }catch(err){
+      toast("Couldn't read "+f.name+". HEIC may need converting to JPEG.");
+    }
+  }
+  mountShots(o); paintData(o);
+  await resolveLocation(o);
+}
+/* every observation ends up with coordinates if any route can supply them */
+async function resolveLocation(o){
+  if(o.lat==null){
+    if(state.site.lat!=null){
+      o.lat=state.site.lat; o.lon=state.site.lon; o.gpsFrom="site"; o.address=state.site.address;
+    }else if(!locBlocker()){
+      try{
+        const p=await getPosition(10000);
+        o.lat=p.lat; o.lon=p.lon; o.gpsFrom="device";
+        if(state.site.lat==null) setSite(p.lat,p.lon,"");
+      }catch(e){}
+    }
+  }else if(state.site.lat==null){
+    setSite(o.lat,o.lon,"");
+  }
+  attachWeather(o);
+  paintData(o);
+}
+
+function addObs(extra){
+  const o=Object.assign({
+    id:"o"+(++seq), photos:[], taken:localStamp(new Date()),
+    lat:null, lon:null, alt:null, gpsFrom:null, address:"", wx:null,
+    cat:"Observation", loc:"", comment:"", action:""
+  },extra||{});
+  if(!Array.isArray(o.photos)) o.photos=[];
+  state.obs.push(o);
+  buildCard(o);
+  renumber();
+  o._root.scrollIntoView({behavior:"smooth",block:"center"});
+  return o;
+}
+function focusComment(o){
+  const ta=o._root.querySelector('[data-f="comment"]');
+  if(ta) ta.focus();
+}
+
+function buildCard(o){
+  const a=document.createElement("article");
+  a.className="slip"; a.id=o.id;
+  a.innerHTML=`
+    <div class="slip__hd">
+      <span class="tag"></span>
+      <span class="slip__num">00</span>
+      <select aria-label="Category">${CATS.map(c=>`<option${c[0]===o.cat?" selected":""}>${esc(c[0])}</option>`).join("")}</select>
+      <span class="icons">
+        <button class="ibtn" type="button" data-a="up" title="Move up" aria-label="Move up">↑</button>
+        <button class="ibtn" type="button" data-a="down" title="Move down" aria-label="Move down">↓</button>
+        <button class="ibtn" type="button" data-a="del" title="Delete observation" aria-label="Delete observation">✕</button>
+      </span>
+    </div>
+    <div class="shots shots--empty"></div>
+    <div class="shotbar">
+      <button class="btn btn--sm" type="button" data-a="add">Add photos</button>
+      <span class="ct"></span>
+    </div>
+    <div class="field">
+      <label class="lbl">Location / area</label>
+      <input data-f="loc" placeholder="e.g. Level 2, grid C-4, north corridor">
+    </div>
+    <div class="field ta">
+      <label class="lbl">Observation</label>
+      <textarea data-f="comment" placeholder="What you saw, and why it matters…"></textarea>
+      <button class="mic" type="button" data-a="mic" data-on="0" title="Dictate" aria-label="Dictate observation">🎙</button>
+    </div>
+    <div class="field">
+      <label class="lbl">Action required / by whom</label>
+      <input data-f="action" placeholder="Optional — e.g. GC to submit RFI, verify before closing wall">
+    </div>
+    <div class="slip__data"></div>`;
+
+  o._root=a;
+  o._els={
+    tag:a.querySelector(".tag"), num:a.querySelector(".slip__num"),
+    sel:a.querySelector("select"), data:a.querySelector(".slip__data"),
+    shots:a.querySelector(".shots"), ct:a.querySelector(".shotbar .ct")
+  };
+  cards.set(o.id,o);
+
+  a.querySelectorAll("[data-f]").forEach(inp=>{
+    inp.value=o[inp.dataset.f]||"";
+    inp.addEventListener("input",()=>{ o[inp.dataset.f]=inp.value; });
+  });
+  o._els.sel.addEventListener("change",()=>{ o.cat=o._els.sel.value; paintTag(o); });
+
+  a.addEventListener("click",ev=>{
+    const b=ev.target.closest("[data-a]");
+    if(!b || !a.contains(b)) return;
+    const act=b.dataset.a;
+    if(act==="del")       removeObs(o);
+    else if(act==="up")   move(o,-1);
+    else if(act==="down") move(o,1);
+    else if(act==="mic")  dictate(o,b);
+    else if(act==="add")  pickPhotos(o);
+    else if(act==="rmshot") removeShot(o, +b.dataset.i);
+    else if(act==="open")   lightbox(o, +b.dataset.i);
+  });
+
+  $("#obsList").appendChild(a);
+  mountShots(o); paintTag(o); paintData(o);
+}
+
+/* photo tiles, rebuilt whenever the set changes */
+function mountShots(o){
+  const g=o._els.shots, n=o.photos.length;
+  g.className="shots"+(n===0?" shots--empty":(n===1?" shots--one":""));
+  g.innerHTML=o.photos.map((p,i)=>`
+    <div class="shot">
+      <img alt="Site photograph ${i+1}" src="${p.thumb}" data-a="open" data-i="${i}">
+      <button class="shot__x" type="button" data-a="rmshot" data-i="${i}"
+        title="Remove this photo" aria-label="Remove photo ${i+1}">✕</button>
+      <span class="shot__n">${pad(i+1)}${p.taken?" · "+clockOnly(p.taken):""}</span>
+    </div>`).join("");
+  o._els.ct.textContent = n===0 ? "no photos" : n===1 ? "1 photo" : n+" photos";
+}
+function removeShot(o,i){
+  const p=o.photos[i];
+  if(!p) return;
+  o.photos.splice(i,1);
+  mountShots(o); paintData(o);
+  toastAction("Photo removed.","Undo",()=>{
+    o.photos.splice(Math.min(i,o.photos.length),0,p);
+    mountShots(o); paintData(o);
+  });
+}
+function pickPhotos(o){
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="image/*"; inp.multiple=true; inp.style.display="none";
+  document.body.appendChild(inp);
+  inp.addEventListener("change",async()=>{
+    const files=[...inp.files]; inp.remove();
+    if(files.length) await addPhotos(o,files);
+  });
+  inp.click();
+}
+
+function paintTag(o){ o._els.tag.style.background=CATC[o.cat]||"#4A5157"; }
+function paintData(o){
+  const bits=[];
+  bits.push(`<span><b>TIME</b> ${esc(prettyTime(o.taken))}</span>`);
+  if(o.photos.length) bits.push(`<span><b>PHOTOS</b> ${o.photos.length}</span>`);
+  if(o.lat!=null) bits.push(`<span><b>POS</b> ${esc(coordStr(o.lat,o.lon))}${o.gpsFrom?" ("+o.gpsFrom+")":""}</span>`);
+  if(o.address) bits.push(`<span><b>PLACE</b> ${esc(o.address)}</span>`);
+  if(o.wx) bits.push(`<span><b>WX</b> ${esc(wxText(o.wx))}</span>`);
+  o._els.data.innerHTML=bits.join("");
+}
+
+function reflow(){ const l=$("#obsList"); state.obs.forEach(x=>l.appendChild(x._root)); }
+function removeObs(o){
+  const i=state.obs.indexOf(o);
+  if(i<0) return;
+  state.obs.splice(i,1);
+  o._root.classList.add("slip--gone");
+  renumber();
+  let undone=false;
+  toastAction("Observation "+pad(i+1)+" deleted.","Undo",()=>{
+    undone=true;
+    state.obs.splice(Math.min(i,state.obs.length),0,o);
+    o._root.classList.remove("slip--gone");
+    reflow(); renumber();
+  },7000);
+  setTimeout(()=>{ if(!undone){ o._root.remove(); cards.delete(o.id); } },7400);
+}
+function move(o,dir){
+  const i=state.obs.indexOf(o), j=i+dir;
+  if(j<0||j>=state.obs.length) return;
+  state.obs.splice(i,1); state.obs.splice(j,0,o);
+  reflow(); renumber();
+}
+function renumber(){
+  state.obs.forEach((o,i)=>{ o._els.num.textContent=pad(i+1); });
+  $("#obsCount").textContent=pad(state.obs.length);
+  $("#empty").style.display=state.obs.length?"none":"";
+}
+
+/* full-screen viewer with paging across an observation's photos */
+function lightbox(o,i){
+  let k=i;
+  const d=document.createElement("div"); d.className="lightbox";
+  const img=document.createElement("img");
+  const nav=document.createElement("div"); nav.className="lbnav";
+  const prev=document.createElement("button"); prev.className="btn btn--sm"; prev.textContent="‹ Prev";
+  const next=document.createElement("button"); next.className="btn btn--sm"; next.textContent="Next ›";
+  const ctr=document.createElement("span"); ctr.className="mono";
+  const close=document.createElement("button"); close.className="btn btn--sm"; close.textContent="Close";
+  function paint(){
+    const p=o.photos[k];
+    if(!p){ d.remove(); return; }
+    img.src=p.img?p.img.url:p.thumb;
+    ctr.textContent=(k+1)+" / "+o.photos.length+(p.taken?"   "+clockOnly(p.taken):"");
+  }
+  prev.addEventListener("click",()=>{ k=(k-1+o.photos.length)%o.photos.length; paint(); });
+  next.addEventListener("click",()=>{ k=(k+1)%o.photos.length; paint(); });
+  close.addEventListener("click",()=>d.remove());
+  if(o.photos.length>1) nav.append(prev,ctr,next,close); else nav.append(ctr,close);
+  d.append(img,nav);
+  d.addEventListener("click",e=>{ if(e.target===d) d.remove(); });
+  document.body.appendChild(d);
+  paint();
+}
+
+/* ============================================================
+   Dictation
+   ============================================================ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec=null, recBtn=null;
+function dictate(o,btn){
+  if(!SR){ toast("This browser has no speech API. Use the mic on your keyboard instead.",5000); return; }
+  if(rec){ const same=recBtn===btn; stopRec(); if(same) return; }
+  const ta=o._root.querySelector('[data-f="comment"]');
+  const base=ta.value?ta.value.replace(/\s+$/,"")+" ":"";
+  rec=new SR(); recBtn=btn;
+  rec.lang=navigator.language||"en-US"; rec.continuous=true; rec.interimResults=true;
+  btn.dataset.on="1";
+  let finalTxt="";
+  rec.onresult=e=>{
+    let interim="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal) finalTxt+=t.replace(/^\s*/," ");
+      else interim+=t;
+    }
+    ta.value=(base+finalTxt+interim).replace(/\s{2,}/g," ").trimStart();
+    o.comment=ta.value;
+  };
+  rec.onerror=e=>{
+    stopRec();
+    toast(e.error==="not-allowed"
+      ? "Microphone blocked. Allow mic access and open this page over https."
+      : "Dictation stopped: "+e.error,5000);
+  };
+  rec.onend=()=>{ if(rec) stopRec(); };
+  try{ rec.start(); toast("Listening — tap the mic again to stop."); }
+  catch(e){ stopRec(); toast("Couldn't start dictation."); }
+}
+function stopRec(){
+  if(rec){ try{rec.onend=null;rec.stop();}catch(e){} rec=null; }
+  if(recBtn){ recBtn.dataset.on="0"; recBtn=null; }
+}
+
+/* ============================================================
+   Save / open / reset
+   ============================================================ */
+function download(blob,name){
+  const u=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),4000);
+}
+function baseName(){
+  const p=[(state.meta.projectNo||state.meta.projectName||"FieldReport").replace(/[^\w-]+/g,"_")];
+  if(state.meta.reportNo) p.push("RPT"+state.meta.reportNo);
+  p.push(state.meta.date||todayISO());
+  return p.join("_");
+}
+$("#btnSave").addEventListener("click",()=>{
+  const data={version:2,meta:state.meta,site:state.site,units:state.units,
+    obs:state.obs.map(o=>({taken:o.taken,lat:o.lat,lon:o.lon,alt:o.alt,gpsFrom:o.gpsFrom,
+      address:o.address,wx:o.wx,cat:o.cat,loc:o.loc,comment:o.comment,action:o.action,
+      photos:o.photos}))};
+  download(new Blob([JSON.stringify(data)],{type:"application/json"}),baseName()+".fieldreport.json");
+  toast("Report file saved to your device.");
+});
+$("#btnOpen").addEventListener("click",()=>$("#fileJson").click());
+$("#fileJson").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value="";
+  if(!f) return;
+  try{
+    const d=JSON.parse(await f.text());
+    Object.assign(state.meta,d.meta||{});
+    Object.assign(state.site,d.site||{});
+    if(d.units){
+      state.units=d.units==="si"?"si":"us";
+      $("#uUS").setAttribute("aria-pressed",String(state.units==="us"));
+      $("#uSI").setAttribute("aria-pressed",String(state.units==="si"));
+    }
+    $("#obsList").innerHTML=""; cards.clear(); state.obs.length=0;
+    (d.obs||[]).forEach(x=>{
+      /* v1 files stored a single img/thumb per observation */
+      if(!x.photos){
+        x.photos = x.thumb ? [{img:x.img,thumb:x.thumb,filename:x.filename||"",taken:x.taken,
+                               lat:x.lat,lon:x.lon}] : [];
+      }
+      addObs(x);
+    });
+    syncMetaForm();
+    if(state.site.lat!=null){ loadSiteWeather(); backfillLocation(); }
+    toast("Report loaded.");
+  }catch(err){ toast("That file isn't a saved report."); }
+});
+let clearArmed=false, clearTimer=null;
+function disarmClear(){
+  clearArmed=false; clearTimeout(clearTimer);
+  const b=$("#btnClear"); b.textContent="Start new report"; b.classList.remove("btn--warn");
+}
+$("#btnClear").addEventListener("click",()=>{
+  const b=$("#btnClear");
+  if(!clearArmed && (state.obs.length||state.meta.projectName)){
+    clearArmed=true; b.textContent="Tap again to clear"; b.classList.add("btn--warn");
+    clearTimer=setTimeout(disarmClear,4000);
+    return;
+  }
+  disarmClear();
+  $("#obsList").innerHTML=""; cards.clear(); state.obs.length=0;
+  Object.keys(state.meta).forEach(k=>state.meta[k]="");
+  state.meta.date=todayISO();
+  state.site={lat:null,lon:null,address:""}; state.wxNow=null; wxCache.clear();
+  $("#wxTemp").textContent="—"; $("#wxDesc").textContent="No site location yet";
+  $("#wxMeta").textContent="Set the site location and the weather fills in automatically.";
+  $("#latIn").value=""; $("#lonIn").value=""; showLocNote("");
+  syncMetaForm(); renumber();
+});
+
+/* ============================================================
+   PDF export
+   ============================================================ */
+const HEX=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+
+$("#btnPdf").addEventListener("click",async()=>{
+  const lib=window.jspdf&&window.jspdf.jsPDF;
+  if(!lib){
+    toast("PDF library didn't load — connect to the internet once, or use Print → Save as PDF.",6000);
+    return;
+  }
+  const b=$("#btnPdf"); b.disabled=true; b.textContent="Building…";
+  try{ await buildPdf(lib); }
+  catch(e){ console.error(e); toast("PDF export failed: "+e.message,5000); }
+  finally{ b.disabled=false; b.textContent="Export PDF"; }
+});
+
+async function buildPdf(JsPDF){
+  const doc=new JsPDF({unit:"mm",format:"letter",compress:true});
+  const PW=doc.internal.pageSize.getWidth(), PH=doc.internal.pageSize.getHeight();
+  const M=14, CW=PW-M*2, HEAD_Y=20, FOOT_Y=PH-12;
+  let y=HEAD_Y;
+  const ink=HEX("#15181B"), gray=HEX("#818A90"), rule=HEX("#C3CAC6"), hv=HEX("#C7D92C");
+
+  function header(){
+    doc.setDrawColor(...ink); doc.setLineWidth(0.8); doc.line(M,13,PW-M,13);
+    doc.setFillColor(...hv); doc.rect(M,13.4,26,1.4,"F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...ink);
+    doc.text("FIELD REPORT",M,11);
+    doc.setFont("helvetica","normal"); doc.setTextColor(...gray);
+    doc.text([state.meta.projectName||"Untitled project","Rpt "+(state.meta.reportNo||"—"),
+      state.meta.date||""].filter(Boolean).join("   ·   "),PW-M,11,{align:"right"});
+  }
+  function footer(){
+    doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.line(M,FOOT_Y-4,PW-M,FOOT_Y-4);
+    doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(...gray);
+    doc.text((state.meta.firm||"")+(state.meta.projectNo?"   ·   Project "+state.meta.projectNo:""),M,FOOT_Y);
+    doc.text("Page "+doc.getCurrentPageInfo().pageNumber,PW-M,FOOT_Y,{align:"right"});
+  }
+  function newPage(){ footer(); doc.addPage(); header(); y=HEAD_Y; }
+  function need(h){ if(y+h>FOOT_Y-8) newPage(); }
+  function label(t,x,yy){ doc.setFont("helvetica","bold");doc.setFontSize(6.6);doc.setTextColor(...gray);
+    doc.text(String(t).toUpperCase(),x,yy); }
+  function value(t,x,yy,w){ doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...ink);
+    const L=doc.splitTextToSize(t||"—",w); doc.text(L,x,yy); return L.length*4.1; }
+
+  header();
+
+  doc.setFont("helvetica","bold"); doc.setFontSize(19); doc.setTextColor(...ink);
+  doc.text(state.meta.projectName||"Untitled project",M,y+4); y+=8;
+  doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(...gray);
+  doc.text("Construction administration field report"+(state.meta.reportNo?"  ·  No. "+state.meta.reportNo:""),M,y+1);
+  y+=7;
+
+  const rows=[
+    [["Date of visit",state.meta.date],["Time on site",[state.meta.arrive,state.meta.depart].filter(Boolean).join(" – ")]],
+    [["Observed by",state.meta.author],["Firm",state.meta.firm]],
+    [["Contractor",state.meta.contractor],["Project no.",state.meta.projectNo]],
+    [["Site",[state.site.address,coordStr(state.site.lat,state.site.lon)].filter(x=>x&&x!=="—").join("  ·  ")],
+     ["Weather",state.meta.wxNote||wxText(state.wxNow)]]
+  ];
+  doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.line(M,y,PW-M,y); y+=5;
+  rows.forEach(r=>{
+    let hmax=0;
+    r.forEach((c,i)=>{
+      const x=M+i*(CW/2), w=CW/2-6;
+      label(c[0],x,y); hmax=Math.max(hmax,value(c[1],x,y+4.2,w));
+    });
+    y+=hmax+5.5;
+  });
+  if(state.meta.present){ need(16); label("Present on site",M,y); y+=4.2; y+=value(state.meta.present,M,y,CW)+5; }
+  if(state.meta.notes){ need(22); label("General notes",M,y); y+=4.2; y+=value(state.meta.notes,M,y,CW)+4; }
+  doc.setDrawColor(...rule); doc.line(M,y,PW-M,y); y+=8;
+
+  if(state.obs.length){
+    doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...ink);
+    doc.text("OBSERVATIONS  ("+state.obs.length+")",M,y); y+=6;
+  }
+
+  /* tile several photos in rows of up to three; the grid is capped
+     at 150 mm so a photo-heavy observation still leaves room for text */
+  function tileGeom(n){
+    const perRow=Math.min(3,n), gap=4, rows=Math.ceil(n/perRow);
+    const tileW=(CW-gap*(perRow-1))/perRow;
+    let tileH=Math.min(62,tileW*0.75);
+    if(rows*(tileH+7)>150) tileH=Math.max(24,150/rows-7);
+    return {perRow,gap,tileW,tileH,rows,h:rows*(tileH+7)};
+  }
+  function drawTiles(o,idx,x,y0){
+    const n=o.photos.length, G=tileGeom(n);
+    let yy=y0, k=0;
+    while(k<n){
+      for(let ri=0; ri<G.perRow && k+ri<n; ri++){
+        const p=o.photos[k+ri], bx=x+ri*(G.tileW+G.gap);
+        if(p.img&&p.img.url&&p.img.w&&p.img.h){
+          const ar=p.img.w/p.img.h;
+          let w=G.tileW, h=w/ar;
+          if(h>G.tileH){ h=G.tileH; w=h*ar; }
+          const ox=bx+(G.tileW-w)/2, oy=yy+(G.tileH-h)/2;
+          try{ doc.addImage(p.img.url,"JPEG",ox,oy,w,h,undefined,"FAST"); }catch(e){}
+          doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.rect(ox,oy,w,h);
+        }
+        doc.setFont("helvetica","normal"); doc.setFontSize(6.4); doc.setTextColor(...gray);
+        doc.text(pad(idx+1)+"."+(k+ri+1)+(p.taken?"   "+clockOnly(p.taken):""),bx,yy+G.tileH+3.4);
+      }
+      yy+=G.tileH+7; k+=G.perRow;
+    }
+    return yy-y0;
+  }
+
+  for(let i=0;i<state.obs.length;i++){
+    const o=state.obs[i];
+    const n=o.photos.length;
+    const single = n===1 && o.photos[0].img;
+    const IW = single?74:0;
+    let ih=0;
+    if(single){
+      const ar=o.photos[0].img.w/o.photos[0].img.h;
+      ih=Math.min(88, IW/ar);
+    }
+    const tilesH = (n>1) ? tileGeom(n).h : 0;
+    const tx=M+(single?IW+7:0), tw=CW-(single?IW+7:0);
+
+    doc.setFontSize(10);
+    const cLines=doc.splitTextToSize(o.comment||"—",tw);
+    const lLines=o.loc?doc.splitTextToSize(o.loc,tw):[];
+    const aLines=o.action?doc.splitTextToSize(o.action,tw):[];
+    const meta=[["Time",prettyTime(o.taken)],
+                ["Position",coordStr(o.lat,o.lon)+(o.address?"  ·  "+o.address:"")],
+                ["Weather",wxText(o.wx)||"—"]];
+    const th = 7 + (lLines.length?lLines.length*4.3+3:0) + cLines.length*4.3 + 3
+             + (aLines.length?aLines.length*4+5:0) + meta.length*3.6 + 3;
+    need(tilesH + Math.max(ih,th) + 11);
+
+    const y0=y;
+    doc.setFillColor(...HEX(CATC[o.cat]||"#4A5157"));
+    doc.rect(M,y0,CW,4.6,"F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(7.6); doc.setTextColor(255,255,255);
+    doc.text(pad(i+1)+"   "+o.cat.toUpperCase()+(n>1?"   ("+n+" photos)":""),M+2.5,y0+3.3);
+    if(o.loc) doc.text(String(o.loc).slice(0,52).toUpperCase(),PW-M-2.5,y0+3.3,{align:"right"});
+    y=y0+8;
+
+    if(n>1){ y += drawTiles(o,i,M,y) + 1; }
+    else if(single){
+      try{ doc.addImage(o.photos[0].img.url,"JPEG",M,y,IW,ih,undefined,"FAST"); }catch(e){}
+      doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.rect(M,y,IW,ih);
+    }
+
+    const textTop=y;
+    let ty=textTop;
+    if(lLines.length){
+      label("Location",tx,ty); ty+=4;
+      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(...ink);
+      doc.text(lLines,tx,ty); ty+=lLines.length*4.3+2.5;
+    }
+    label("Observation",tx,ty); ty+=4;
+    doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(...ink);
+    doc.text(cLines,tx,ty); ty+=cLines.length*4.3+3;
+    if(aLines.length){
+      label("Action required",tx,ty); ty+=4;
+      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(...HEX("#BF3126"));
+      doc.text(aLines,tx,ty); ty+=aLines.length*4+3;
+    }
+    doc.setFont("helvetica","normal");doc.setFontSize(7.2);doc.setTextColor(...gray);
+    meta.forEach(m=>{ doc.text(m[0].toUpperCase()+"  "+m[1],tx,ty); ty+=3.6; });
+
+    y = single ? textTop + Math.max(ih+2, ty-textTop) + 7 : ty + 7;
+    doc.setDrawColor(...rule); doc.setLineWidth(0.2);
+    doc.setLineDashPattern([1,1],0); doc.line(M,y-4,PW-M,y-4); doc.setLineDashPattern([],0);
+  }
+
+  need(30); y+=4;
+  doc.setFont("helvetica","normal"); doc.setFontSize(7.6); doc.setTextColor(...gray);
+  const disc="This report covers observations made during a periodic site visit and does not constitute "+
+    "a continuous or exhaustive inspection of the work, nor approval of work not in conformance with the contract documents.";
+  doc.text(doc.splitTextToSize(disc,CW),M,y); y+=10;
+  doc.setDrawColor(...ink); doc.setLineWidth(0.3);
+  doc.line(M,y+8,M+70,y+8); label("Signature",M,y+12);
+  doc.line(M+80,y+8,M+150,y+8);
+  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...ink);
+  doc.text((state.meta.author||"")+(state.meta.date?"   ·   "+state.meta.date:""),M+80,y+6);
+  label("Name and date",M+80,y+12);
+
+  footer();
+  doc.save(baseName()+".pdf");
+  toast("PDF exported.");
+}
+
+/* ---------------- startup ---------------- */
+window.addEventListener("beforeunload",e=>{
+  if(state.obs.length){ e.preventDefault(); e.returnValue=""; }
+});
+(function boot(){
+  renumber();
+  const blocked=locBlocker();
+  if(blocked) showLocNote("<b>Heads up.</b> "+esc(blocked)+
+    " Address search and typed coordinates still work, and weather follows from either.");
+})();
+</script>
+</body>
+</html>
