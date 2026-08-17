@@ -310,7 +310,7 @@
       so a private repo is the right choice for construction administration records.
     </div>
     <div class="optrow" style="border-bottom:1px solid var(--rule-2)">
-      <button class="btn btn--sm" id="btnGhPush">Push this report</button>
+      <button class="btn btn--sm" id="btnGhPush">Push now (retry)</button>
       <button class="btn btn--sm" id="btnGhPull">Pull open items</button>
       <button class="btn btn--sm btn--quiet" id="btnGhList">Browse archive</button>
       <button class="btn btn--sm btn--quiet" id="btnGhTest">Test connection</button>
@@ -338,7 +338,7 @@
     </div>
     <div class="optrow" style="border-top:1px solid var(--rule-2)" id="cfRow">
       <button class="btn btn--sm" id="btnCarry">Carry forward open items</button>
-      <button class="btn btn--sm btn--quiet" id="btnCarryFile">Import from a saved report</button>
+      <button class="btn btn--sm btn--quiet" id="btnCarryFile">From a file</button>
     </div>
   </section>
 
@@ -409,18 +409,17 @@
 
   <div class="rowbtns">
     <button class="btn btn--sm" id="btnFinish">Finish &amp; file report</button>
-    <button class="btn btn--quiet btn--sm" id="btnSave">Save report file</button>
-    <button class="btn btn--quiet btn--sm" id="btnOpen">Open report file</button>
+    <button class="btn btn--quiet btn--sm" id="btnSave">Save PDF</button>
     <button class="btn btn--quiet btn--sm" id="btnClear">Start next report</button>
   </div>
 
   <div class="foot">
     <h3>Notes</h3>
-    Project setup, disciplines, recent locations, report numbering and the filed-report archive are
-    saved in this browser, so they persist between visits on this device. The archive keeps text and
-    small reference thumbnails only — <strong>Save report file</strong> is still the full record, and
-    the one to keep or hand off. Location, microphone and weather need the page served over
-    <code>https://</code> as its own tab.
+    Project setup, recent locations, report numbering and the filed-report list are saved in this
+    browser. <strong>Finish &amp; file report</strong> archives the report and pushes it to your
+    online archive in one step. Deleting a report from the carry-forward list removes it here and
+    from the archive, so other devices lose it on their next <strong>Pull</strong>. Location,
+    microphone and weather need the page served over <code>https://</code> as its own tab.
   </div>
 </div>
 
@@ -432,7 +431,6 @@
 
 <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fileLib" accept="image/*" multiple hidden>
-<input type="file" id="fileJson" accept=".json,application/json" hidden>
 <input type="file" id="fileCarry" accept=".json,application/json" hidden>
 <input type="file" id="fileLogo" accept="image/*" hidden>
 
@@ -491,7 +489,7 @@ function blankProject(name){
     name:name||"", shortName:"", number:"", address:"", firm:FIRM_NAME, aor:"", firmContact:"",
     contractor:"", owner:"", distribution:"",
     nextReportNo:1, digits:3, footer:FIRM_FOOTER, logo:FIRM_LOGO, places:[], history:[],
-    defaultDiscipline:DEF_DISC[1],
+    defaultDiscipline:DEF_DISC[1], deleted:[],
     ghOwner:"", ghRepo:"", ghPath:"reports", ghBranch:"main", ghToken:"", ghLast:""};
 }
 
@@ -571,7 +569,7 @@ const store={
     try{ localStorage.setItem(LSKEY,JSON.stringify(v)); return true; }
     catch(e){
       this.ok=false;
-      toast("Couldn't save to this browser's storage — it may be full or blocked. Use Save report file.",6000);
+      toast("Couldn't save to this browser's storage — it may be full or blocked. File the report so it reaches the archive.",6000);
       return false;
     }
   }
@@ -876,11 +874,15 @@ function resample(src,maxDim,quality){
   g.imageSmoothingQuality="high";g.drawImage(src,0,0,w,h);
   return {url:c.toDataURL("image/jpeg",quality),w,h};
 }
-function loadImg(url){
+function loadImg(url,timeout){
   return new Promise((res,rej)=>{
     const i=new Image();
-    i.onload=()=>res(i);
-    i.onerror=()=>rej(new Error("image load"));
+    /* a decode that never settles would hang filing, markup and PDF export,
+       leaving a disabled button and no explanation */
+    const t=setTimeout(()=>{ i.onload=i.onerror=null; rej(new Error("image decode timed out")); },
+      timeout||10000);
+    i.onload=()=>{ clearTimeout(t); res(i); };
+    i.onerror=()=>{ clearTimeout(t); rej(new Error("image load")); };
     i.src=url;
   });
 }
@@ -920,13 +922,13 @@ function drawMarks(ctx,marks,W,H){
     }
   });
 }
-async function flatten(p,maxDim){
+async function flatten(p,maxDim,timeout){
   const src=p.img;
   if(!src||!src.url) return null;
   if(!p.marks||!p.marks.length){
     if(!maxDim||Math.max(src.w,src.h)<=maxDim) return src;
   }
-  const img=await loadImg(src.url);
+  const img=await loadImg(src.url,timeout);
   const k=maxDim?Math.min(1,maxDim/Math.max(src.w,src.h)):1;
   const W=Math.max(1,Math.round(src.w*k)), H=Math.max(1,Math.round(src.h*k));
   const c=document.createElement("canvas"); c.width=W; c.height=H;
@@ -936,7 +938,7 @@ async function flatten(p,maxDim){
   return {url:c.toDataURL("image/jpeg",0.85),w:W,h:H};
 }
 async function refreshThumb(p){
-  try{ const t=await flatten(p,760); if(t) p.thumb=t.url; }catch(e){}
+  try{ const t=await flatten(p,760); if(t){ p.thumb=t.url; p.tw=t.w; p.th=t.h; } }catch(e){}
 }
 
 /* ============================================================
@@ -1152,7 +1154,8 @@ async function addPhotos(o,files){
     try{
       const ex=await readExif(f);
       const bmp=await decode(f);
-      const p={img:resample(bmp,1600,0.82), thumb:resample(bmp,760,0.78).url, marks:[],
+      const th=resample(bmp,760,0.78);
+      const p={img:resample(bmp,1600,0.82), thumb:th.url, tw:th.w, th:th.h, marks:[],
                filename:f.name, taken:(ex&&ex.taken)||localStamp(new Date(f.lastModified||Date.now())),
                lat:ex?ex.lat:null, lon:ex?ex.lon:null};
       if(bmp.close) bmp.close();
@@ -1547,84 +1550,133 @@ async function openMarkup(o,idx){
 /* ============================================================
    Carry-forward
    ============================================================ */
+function unresolved(rec){ return (rec&&rec.obs||[]).filter(x=>OPEN_STATES.includes(x.status)); }
 function paintCarry(){
   const h=state.project.history||[];
-  const last=h[h.length-1];
   const b=$("#btnCarry");
-  if(!last){ b.disabled=true; b.textContent="Carry forward (no filed reports yet)"; return; }
-  const open=(last.obs||[]).filter(x=>OPEN_STATES.includes(x.status)).length;
+  if(!h.length){ b.disabled=true; b.textContent="Carry forward (no filed reports yet)"; return; }
   b.disabled=false;
-  b.textContent="Carry forward from RPT "+last.reportNo+" ("+open+" open)";
+  const open=h.reduce((n,r)=>n+(r.obs||[]).filter(x=>OPEN_STATES.includes(x.status)).length,0);
+  b.textContent="Carry forward open items ("+h.length+" report"+(h.length>1?"s":"")+
+    ", "+open+" open)";
 }
-function openCarrySheet(items,label){
+/* every unresolved item comes across: New, Open, Ongoing, Contractor response required */
+function carryAll(rec){
+  const items=(rec.obs||[]).filter(x=>OPEN_STATES.includes(x.status));
+  items.forEach(it=>{
+    const photos=[];
+    if(it.thumb) photos.push({img:{url:it.thumb,w:it.tw||300,h:it.th||225}, thumb:it.thumb,
+      tw:it.tw||300, th:it.th||225, marks:[], filename:"reference",
+      taken:it.taken||"", lat:null, lon:null, ref:true});
+    addObs({discipline:it.discipline||disciplines()[0], cat:it.cat||"Observation",
+      status: it.status==="New" ? "Open" : it.status,
+      floor:it.floor||"", room:it.room||"", area:it.area||"",
+      comment:it.comment||"", action:it.action||"", origin:it.ref||"", photos});
+  });
+  renumber();
+  return items.length;
+}
+/* removing a report takes it off this device, out of the shared index, and
+   deletes the archived file, so it cannot reappear on the next Pull */
+async function deleteReport(no,rowBtn){
+  const p=state.project;
+  p.history=(p.history||[]).filter(h=>h.reportNo!==no);
+  p.deleted=[...new Set([...(p.deleted||[]),no])];
+  writeNow(); paintCarry();
+  const c=ghCfg();
+  if(c.owner&&c.repo&&c.token){
+    ghSay("Removing RPT "+no+" from the archive\u2026");
+    try{
+      await ghPut(ghDir()+"/index.json", JSON.stringify(indexPayload(),null,1),
+        "Remove report "+no+" from index");
+      let gone=0;
+      for(const name of ["Field Report "+no+".json","Field Report "+no+" (text only).json"]){
+        try{ if(await ghDelete(ghDir()+"/"+name,"Remove field report "+no)) gone++; }catch(e){}
+      }
+      ghSay("RPT "+no+" removed from this device and the archive"+
+        (gone?" ("+gone+" file"+(gone>1?"s":"")+" deleted)":"")+
+        ". Other devices lose it on their next Pull.");
+    }catch(e){
+      ghSay("Removed here, but the archive still has it: "+e.message+
+        " Push or delete again when you have a connection.");
+    }
+  }else{
+    ghSay("RPT "+no+" removed from this device.");
+  }
+  toast("RPT "+no+" deleted.");
+}
+function openCarryPicker(){
   const ov=document.createElement("div"); ov.className="ov";
   const sheet=document.createElement("div"); sheet.className="ovsheet";
-  const h=document.createElement("h3"); h.textContent="Carry forward from "+label;
+  const h=document.createElement("h3"); h.textContent="Carry forward from a filed report";
   sheet.appendChild(h);
-  if(!items.length){
-    const p=document.createElement("div");
-    p.style.padding="14px"; p.style.fontSize="13px"; p.className="dim";
-    p.textContent="No open items in that report — everything was closed.";
-    sheet.appendChild(p);
-  }
-  const boxes=[];
-  items.forEach(it=>{
-    const row=document.createElement("label"); row.className="cf";
-    const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=true;
-    boxes.push({cb,it});
-    row.appendChild(cb);
-    if(it.thumb){ const im=document.createElement("img"); im.src=it.thumb; im.alt=""; row.appendChild(im); }
-    const body=document.createElement("div"); body.className="cfb";
-    const m=document.createElement("div"); m.className="cfm";
-    m.textContent=[it.ref,it.discipline,it.status,placeStr(it)].filter(Boolean).join("  ·  ");
-    const t=document.createElement("div"); t.className="cft";
-    t.textContent=(it.comment||"").slice(0,220);
-    body.append(m,t); row.appendChild(body);
-    sheet.appendChild(row);
-  });
-  const foot=document.createElement("div"); foot.className="ovfoot";
-  const imp=document.createElement("button"); imp.className="btn btn--hv btn--sm"; imp.type="button";
-  imp.textContent="Import selected";
-  const none=document.createElement("button"); none.className="btn btn--sm btn--quiet"; none.type="button";
-  none.textContent="Cancel";
-  const keep=document.createElement("label");
-  keep.style.cssText="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);margin-left:auto";
-  const keepCb=document.createElement("input"); keepCb.type="checkbox"; keepCb.checked=true;
-  keepCb.style.cssText="width:18px;height:18px";
-  keep.append(keepCb,document.createTextNode("Keep reference photo"));
-  foot.append(imp,none,keep);
-  sheet.appendChild(foot);
-  imp.addEventListener("click",()=>{
-    let n=0;
-    boxes.forEach(({cb,it})=>{
-      if(!cb.checked) return;
-      const photos=[];
-      if(keepCb.checked && it.thumb)
-        photos.push({img:{url:it.thumb,w:it.tw||760,h:it.th||570}, thumb:it.thumb, marks:[],
-                     filename:"reference", taken:it.taken||"", lat:null, lon:null, ref:true});
-      addObs({discipline:it.discipline||disciplines()[0], cat:it.cat||"Observation",
-              status: it.status==="New" ? "Open" : (it.status||"Open"),
-              floor:it.floor||"", room:it.room||"", area:it.area||"",
-              comment:it.comment||"", action:it.action||"",
-              origin:it.ref||"", photos});
-      n++;
+  const list=document.createElement("div");
+  sheet.appendChild(list);
+  function rows(){
+    const recs=(state.project.history||[]).slice().reverse();
+    list.innerHTML="";
+    if(!recs.length){
+      const e=document.createElement("div");
+      e.style.cssText="padding:14px;font-size:13px"; e.className="dim";
+      e.textContent="No filed reports yet. Use Finish & file report first.";
+      list.appendChild(e);
+      return;
+    }
+    recs.forEach(rec=>{
+      const open=(rec.obs||[]).filter(x=>OPEN_STATES.includes(x.status)).length;
+      const row=document.createElement("div"); row.className="cf";
+      if(rec.obs&&rec.obs[0]&&rec.obs[0].thumb){
+        const im=document.createElement("img"); im.src=rec.obs[0].thumb; im.alt=""; row.appendChild(im);
+      }
+      const body=document.createElement("div"); body.className="cfb";
+      const t=document.createElement("div"); t.className="cft";
+      t.textContent="RPT "+rec.reportNo+"  \u00b7  "+fmtDate(rec.date);
+      const m=document.createElement("div"); m.className="cfm";
+      m.textContent=(rec.obs||[]).length+" item"+((rec.obs||[]).length===1?"":"s")+
+        "  \u00b7  "+open+" unresolved";
+      body.append(t,m);
+      const acts=document.createElement("div");
+      acts.style.cssText="display:flex;flex-direction:column;gap:5px;align-items:stretch";
+      const take=document.createElement("button");
+      take.className="btn btn--xs"; take.type="button";
+      take.textContent = open ? "Carry "+open+" items" : "Nothing open";
+      take.disabled=!open;
+      take.addEventListener("click",()=>{
+        const n=carryAll(rec);
+        ov.remove();
+        toast(n+" item"+(n===1?"":"s")+" carried in from RPT "+rec.reportNo+
+          ". Update each status as you re-inspect.",6000);
+      });
+      const del=document.createElement("button");
+      del.className="btn btn--xs btn--quiet"; del.type="button"; del.textContent="Delete";
+      let armed=false;
+      del.addEventListener("click",()=>{
+        if(!armed){
+          armed=true; del.textContent="Delete?"; del.classList.add("btn--warn");
+          setTimeout(()=>{ armed=false; del.textContent="Delete"; del.classList.remove("btn--warn"); },4000);
+          return;
+        }
+        deleteReport(rec.reportNo,del).then(rows);
+      });
+      acts.append(take,del);
+      row.append(body,acts);
+      list.appendChild(row);
     });
-    ov.remove();
-    renumber();
-    toast(n?(n+" item"+(n>1?"s":"")+" carried forward. Update each status as you re-inspect."):"Nothing selected.");
-  });
-  none.addEventListener("click",()=>ov.remove());
+  }
+  rows();
+  const foot=document.createElement("div"); foot.className="ovfoot";
+  const close=document.createElement("button");
+  close.className="btn btn--sm btn--quiet"; close.type="button"; close.textContent="Close";
+  close.addEventListener("click",()=>ov.remove());
+  const hint=document.createElement("span");
+  hint.className="dim"; hint.style.cssText="font-size:11px;align-self:center;margin-left:auto";
+  hint.textContent="Delete removes it here and from the archive.";
+  foot.append(close,hint);
+  sheet.appendChild(foot);
   ov.addEventListener("click",e=>{ if(e.target===ov) ov.remove(); });
-  ov.appendChild(sheet);
-  document.body.appendChild(ov);
+  ov.appendChild(sheet); document.body.appendChild(ov);
 }
-$("#btnCarry").addEventListener("click",()=>{
-  const h=state.project.history||[];
-  const last=h[h.length-1];
-  if(!last) return;
-  const items=(last.obs||[]).filter(x=>OPEN_STATES.includes(x.status));
-  openCarrySheet(items,"RPT "+last.reportNo+" ("+fmtDate(last.date)+")");
-});
+$("#btnCarry").addEventListener("click",openCarryPicker);
 $("#btnCarryFile").addEventListener("click",()=>$("#fileCarry").click());
 $("#fileCarry").addEventListener("change",async e=>{
   const f=e.target.files[0]; e.target.value="";
@@ -1725,8 +1777,17 @@ async function ghReq(url,opts,raw){
            "X-GitHub-Api-Version":"2022-11-28"};
   if(c.token) h.Authorization="Bearer "+c.token;
   if(opts&&opts.body) h["Content-Type"]="application/json";
-  const r=await fetch(url,Object.assign({},opts,{headers:h}));
-  return r;
+  try{
+    return await fetch(url,Object.assign({},opts,{headers:h}));
+  }catch(err){
+    /* fetch throws (rather than returning a status) when the request never
+       completed: no connection, a blocked host, or a body the far end
+       dropped without CORS headers on the error. */
+    throw new Error("The browser couldn't complete the request to github.com. "+
+      "Usual causes: no connection, an office network or VPN blocking api.github.com, "+
+      "an ad-blocking extension, or a payload too large to accept. ("+
+      (err&&err.message?err.message:"network error")+")");
+  }
 }
 function ghErr(r){
   if(r.status===401) return "Token rejected (401). Check it hasn't expired.";
@@ -1760,6 +1821,62 @@ async function ghPut(filePath,text,message){
   if(!r.ok) throw new Error(ghErr(r));
   return await r.json();
 }
+/* One commit, any number of files, via blobs. Used when the payload is big
+   enough that the simple contents endpoint becomes unreliable. */
+async function ghCommit(files,message){
+  const c=ghCfg();
+  if(!c.token) throw new Error("Writing needs an access token.");
+  const base="https://api.github.com/repos/"+encodeURIComponent(c.owner)+"/"+encodeURIComponent(c.repo);
+  const blobs=[];
+  for(const f of files){
+    const r=await ghReq(base+"/git/blobs",{method:"POST",
+      body:JSON.stringify({content:b64enc(f.text),encoding:"base64"})},false);
+    if(!r.ok) throw new Error("Uploading "+f.path.split("/").pop()+" failed. "+ghErr(r));
+    const d=await r.json();
+    blobs.push({path:f.path,mode:"100644",type:"blob",sha:d.sha});
+  }
+  const rr=await ghReq(base+"/git/ref/heads/"+encodeURIComponent(c.branch),{method:"GET"},false);
+  if(!rr.ok) throw new Error("Couldn't read branch "+c.branch+". "+ghErr(rr));
+  const ref=await rr.json();
+  const headSha=ref.object.sha;
+  const cr=await ghReq(base+"/git/commits/"+headSha,{method:"GET"},false);
+  if(!cr.ok) throw new Error(ghErr(cr));
+  const headCommit=await cr.json();
+  const tr=await ghReq(base+"/git/trees",{method:"POST",
+    body:JSON.stringify({base_tree:headCommit.tree.sha,tree:blobs})},false);
+  if(!tr.ok) throw new Error("Building the commit failed. "+ghErr(tr));
+  const tree=await tr.json();
+  const nc=await ghReq(base+"/git/commits",{method:"POST",
+    body:JSON.stringify({message:message,tree:tree.sha,parents:[headSha]})},false);
+  if(!nc.ok) throw new Error(ghErr(nc));
+  const commit=await nc.json();
+  const up=await ghReq(base+"/git/refs/heads/"+encodeURIComponent(c.branch),{method:"PATCH",
+    body:JSON.stringify({sha:commit.sha})},false);
+  if(!up.ok) throw new Error("Couldn't move branch "+c.branch+". "+ghErr(up));
+  return commit;
+}
+/* a copy carrying thumbnails instead of full photos, for when the full one won't go */
+function lightReport(){
+  const d=serialise();
+  d.photosStripped=true;
+  d.obs.forEach(o=>{
+    o.photos=(o.photos||[]).map(p=>({
+      img: p.thumb ? {url:p.thumb,w:p.tw||760,h:p.th||570} : null,
+      thumb:p.thumb||"", tw:p.tw||760, th:p.th||570,
+      marks:[], filename:p.filename||"", taken:p.taken||"",
+      lat:p.lat??null, lon:p.lon??null, ref:true}));
+  });
+  return d;
+}
+async function ghDelete(filePath,message){
+  const c=ghCfg();
+  if(!c.token) return false;
+  const sha=await ghSha(filePath);
+  if(!sha) return false;
+  const r=await ghReq(ghUrl(filePath,false),{method:"DELETE",
+    body:JSON.stringify({message:message||"Remove field report",sha:sha,branch:c.branch})},false);
+  return r.ok;
+}
 async function ghList(){
   const r=await ghReq(ghUrl(ghDir(),true),{method:"GET"},false);
   if(r.status===404) return [];
@@ -1767,21 +1884,51 @@ async function ghList(){
   const d=await r.json();
   return Array.isArray(d)?d.filter(x=>x.type==="file"&&/\.json$/i.test(x.name)):[];
 }
+/* the project template travels with the index, so a new device gets the
+   letterhead details from Pull rather than retyping them */
+function templatePayload(){
+  const p=state.project, t={};
+  ["name","shortName","number","address","firm","aor","firmContact","contractor","owner",
+   "distribution","footer","digits","defaultDiscipline"].forEach(k=>{ t[k]=p[k]; });
+  if(p.logo&&p.logo.url&&p.logo.url!==FIRM_LOGO.url) t.logo=p.logo;
+  return t;
+}
 function indexPayload(){
   const p=state.project;
-  return {kind:"field-report-index", version:3, updated:new Date().toISOString(),
+  const pack=r=>({reportNo:r.reportNo,date:r.date,savedAt:r.savedAt,
+    obs:(r.obs||[]).map(o=>Object.assign({},o))});
+  const out={kind:"field-report-index", version:3, updated:new Date().toISOString(),
     project:{name:p.name,shortName:p.shortName,number:p.number,address:p.address},
-    nextReportNo:p.nextReportNo, reports:p.history||[]};
+    template:templatePayload(), deleted:(p.deleted||[]),
+    nextReportNo:p.nextReportNo, reports:(p.history||[]).map(pack)};
+  /* this file is pulled on site over whatever signal exists, so cap it:
+     drop reference thumbnails from the oldest reports until it is small */
+  const LIMIT=700000;
+  for(let i=0;i<out.reports.length && JSON.stringify(out).length>LIMIT;i++)
+    out.reports[i].obs.forEach(o=>{ o.thumb=""; });
+  if(JSON.stringify(out).length>LIMIT)
+    out.reports.forEach(r=>r.obs.forEach(o=>{ o.thumb=""; }));
+  return out;
 }
 function mergeIndex(idx){
   const p=state.project;
   if(!idx||!Array.isArray(idx.reports)) return 0;
+  /* deletions are recorded, not implied by absence, so one device removing a
+     report doesn't get undone by another device that still holds it */
+  const tomb=new Set([...(p.deleted||[]),...(Array.isArray(idx.deleted)?idx.deleted:[])]);
+  p.deleted=[...tomb];
   const byNo={};
-  (p.history||[]).forEach(h=>byNo[h.reportNo]=h);
+  (p.history||[]).forEach(h=>{ if(!tomb.has(h.reportNo)) byNo[h.reportNo]=h; });
   let n=0;
   idx.reports.forEach(r=>{
+    if(tomb.has(r.reportNo)) return;
     const cur=byNo[r.reportNo];
     if(!cur || (r.savedAt||"")>(cur.savedAt||"")){ byNo[r.reportNo]=r; n++; }
+  });
+  /* fill any blank letterhead field from the shared template */
+  if(idx.template) Object.keys(idx.template).forEach(k=>{
+    const v=idx.template[k];
+    if(v!==undefined && v!==null && v!=="" && !p[k]) p[k]=v;
   });
   p.history=Object.values(byNo).sort((a,b)=>
     String(a.reportNo).localeCompare(String(b.reportNo),undefined,{numeric:true}));
@@ -1807,27 +1954,44 @@ $("#btnGhTest").addEventListener("click",async()=>{
   }catch(e){ ghSay(e.message); }
 });
 
-$("#btnGhPush").addEventListener("click",async()=>{
+$("#btnGhPush").addEventListener("click",()=>doPush(false));
+async function doPush(light){
   const c=ghReady(); if(!c) return;
   const b=$("#btnGhPush"); b.disabled=true; b.textContent="Pushing…";
+  const no=state.meta.reportNo||nextReportNumber();
+  const idxText=JSON.stringify(indexPayload(),null,1);
+  const body=light?lightReport():serialise();
+  const full=JSON.stringify(body);
+  const mb=full.length/1048576;
+  const name="Field Report "+no+(light?" (text only)":"")+".json";
   try{
-    const no=state.meta.reportNo||nextReportNumber();
-    const full=JSON.stringify(serialise());
-    const mb=(full.length/1048576);
-    ghSay("Uploading report "+no+" ("+mb.toFixed(1)+" MB) and the carry-forward index…");
-    await ghPut(ghDir()+"/index.json", JSON.stringify(indexPayload(),null,1),
-      "Carry-forward index — "+(state.project.name||projSlug()));
-    await ghPut(ghDir()+"/Field Report "+no+".json", full,
-      "Field report "+no+" — "+fmtDate(state.meta.date));
+    /* the index goes first and on its own: it is small, and it is the file
+       carry-forward depends on, so it should survive a failure on the big one */
+    ghSay("Uploading the carry-forward index…");
+    await ghPut(ghDir()+"/index.json", idxText, "Carry-forward index — "+(state.project.name||projSlug()));
+    ghSay("Index done. Uploading "+name+" ("+mb.toFixed(1)+" MB)…");
+    if(full.length>900000){
+      await ghCommit([{path:ghDir()+"/"+name,text:full}],
+        "Field report "+no+" — "+fmtDate(state.meta.date));
+    }else{
+      await ghPut(ghDir()+"/"+name, full, "Field report "+no+" — "+fmtDate(state.meta.date));
+    }
     state.project.ghLast=new Date().toISOString();
     writeNow();
     ghSay("Pushed to "+ghDir()+"/ at "+new Date().toTimeString().slice(0,5)+
-      ". Index holds "+(state.project.history||[]).length+" filed report(s).");
-    toast("Report and index pushed to GitHub.");
-  }catch(e){ ghSay(e.message); toast(e.message,6000); }
-  finally{ b.disabled=false; b.textContent="Push this report"; }
-});
-
+      ". Index holds "+(state.project.history||[]).length+" filed report(s). "+
+      name+" is "+mb.toFixed(1)+" MB.");
+    toast(light?"Text-only report pushed.":"Report and index pushed to GitHub.");
+  }catch(e){
+    ghSay(e.message+"  —  the report is "+mb.toFixed(1)+" MB. The index may already have gone up; "+
+      "check the repo, then use Push now to retry.");
+    if(!light && mb>0.5){
+      toastAction("Push failed at "+mb.toFixed(1)+" MB.","Try text only",()=>doPush(true),9000);
+    }else{
+      toast(e.message,7000);
+    }
+  }finally{ b.disabled=false; b.textContent="Push now (retry)"; }
+}
 $("#btnGhPull").addEventListener("click",async()=>{
   const c=ghReady(); if(!c) return;
   const b=$("#btnGhPull"); b.disabled=true; b.textContent="Pulling…";
@@ -2019,41 +2183,65 @@ function loadReportObject(d){
   if(state.site.lat!=null){ loadSiteWeather(); backfillLocation(); }
   writeNow();
 }
-$("#btnSave").addEventListener("click",()=>{
-  download(new Blob([JSON.stringify(serialise())],{type:"application/json"}),
-    reportFileBase()+".fieldreport.json");
-  toast("Full report file saved, photos and markup included.");
-});
-$("#btnOpen").addEventListener("click",()=>$("#fileJson").click());
-$("#fileJson").addEventListener("change",async e=>{
-  const f=e.target.files[0]; e.target.value="";
-  if(!f) return;
-  try{ loadReportObject(JSON.parse(await f.text())); toast("Report loaded."); }
+$("#btnSave").addEventListener("click",()=>$("#btnPdf").click());
+/* no Open button any more: drop an archived .json anywhere on the page to load it */
+["dragover","drop"].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+document.addEventListener("drop",async e=>{
+  const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
+  if(!f||!/\.json$/i.test(f.name)) return;
+  try{ loadReportObject(JSON.parse(await f.text())); toast("Report loaded from "+f.name+"."); }
   catch(err){ toast("That file isn't a saved report."); }
 });
 
 /* file the report: archive a light copy, bump the number */
-$("#btnFinish").addEventListener("click",()=>{
+$("#btnFinish").addEventListener("click",async()=>{
   if(!state.obs.length){ toast("Nothing to file yet."); return; }
-  const p=state.project;
-  const no=state.meta.reportNo||nextReportNumber();
-  const rec={reportNo:no, date:state.meta.date||todayISO(), savedAt:new Date().toISOString(),
-    obs:state.obs.map((o,i)=>({
-      ref:"RPT "+no+" item "+pad(i+1),
-      discipline:o.discipline, cat:o.cat, status:o.status,
-      floor:o.floor, room:o.room, area:o.area,
-      comment:o.comment, action:o.action, taken:o.taken,
-      thumb:(o.photos[0]&&o.photos[0].thumb)||"", tw:760, th:570
-    }))};
-  p.history=(p.history||[]).filter(h=>h.reportNo!==no);
-  p.history.push(rec);
-  if(p.history.length>24) p.history.shift();
-  const n=parseInt(no,10);
-  if(isFinite(n)) p.nextReportNo=n+1;
-  writeNow();
-  paintCarry();
-  const open=rec.obs.filter(x=>OPEN_STATES.includes(x.status)).length;
-  toast("Filed RPT "+no+". "+open+" open item"+(open===1?"":"s")+" ready to carry into RPT "+nextReportNumber()+".",6000);
+  const btn=$("#btnFinish"); btn.disabled=true; btn.textContent="Filing…";
+  try{
+    const p=state.project;
+    const no=state.meta.reportNo||nextReportNumber();
+    /* thumbnails in parallel: sequential decoding would freeze the button
+       for seconds on a long report */
+    const obs=await Promise.all(state.obs.map(async(o,i)=>{
+      let ref="", rw=300, rh=225;
+      const first=o.photos[0];
+      if(first){
+        try{
+          const t=await flatten(first,300,2500);
+          if(t){ ref=t.url; rw=t.w; rh=t.h; }
+          else { ref=first.thumb||""; rw=first.tw||760; rh=first.th||570; }
+        }catch(e){ ref=first.thumb||""; rw=first.tw||760; rh=first.th||570; }
+      }
+      return {ref:"RPT "+no+" item "+pad(i+1),
+        discipline:o.discipline, cat:o.cat, status:o.status,
+        floor:o.floor, room:o.room, area:o.area,
+        comment:o.comment, action:o.action, taken:o.taken,
+        thumb:ref, tw:rw, th:rh};
+    }));
+    const rec={reportNo:no, date:state.meta.date||todayISO(),
+      savedAt:new Date().toISOString(), obs};
+    p.history=(p.history||[]).filter(h=>h.reportNo!==no);
+    p.history.push(rec);
+    if(p.history.length>24) p.history.shift();
+    const n=parseInt(no,10);
+    if(isFinite(n)) p.nextReportNo=n+1;
+    writeNow();
+    paintCarry();
+    const open=rec.obs.filter(x=>OPEN_STATES.includes(x.status)).length;
+    toast("Filed RPT "+no+". "+open+" open item"+(open===1?"":"s")+
+      " ready to carry into RPT "+nextReportNumber()+".",6000);
+    /* filing is the moment the statuses are final, so this is when the archive
+       should be updated — no separate Push step to remember */
+    const c=ghCfg();
+    if(c.owner&&c.repo&&c.token){
+      btn.textContent="Pushing…";
+      await doPush(false);
+    }else{
+      ghSay("Filed on this device only. Add the online archive in Setup and filing will "+
+        "push automatically.");
+    }
+  }catch(e){ toast("Couldn't file the report: "+e.message,6000); }
+  finally{ btn.disabled=false; btn.textContent="Finish & file report"; }
 });
 
 let clearArmed=false, clearTimer=null;
