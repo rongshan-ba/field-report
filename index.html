@@ -22,20 +22,23 @@
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{background:var(--slab);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;
-    -webkit-text-size-adjust:100%;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
-  .wrap{max-width:760px;margin:0 auto;padding:0 14px}
+    -webkit-text-size-adjust:100%;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  .wrap{max-width:820px;margin:0 auto;padding:0 14px}
   .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
   .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;
     color:var(--ink-3);display:block;margin:0 0 4px}
   .dim{color:var(--ink-3)}
+  .hide{display:none !important}
 
   .topbar{position:sticky;top:0;z-index:40;background:var(--ink);color:#fff;
-    padding:calc(8px + env(safe-area-inset-top)) 14px 8px;display:flex;align-items:center;gap:12px;
+    padding:calc(8px + env(safe-area-inset-top)) 14px 8px;display:flex;align-items:center;gap:10px;
     border-bottom:3px solid var(--hv)}
-  .topbar .id{min-width:0;flex:1}
+  .topbar .id{min-width:0;flex:1;cursor:pointer;background:none;border:0;color:inherit;
+    font:inherit;text-align:left;padding:0}
   .topbar .id b{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
   .topbar .id span{display:block;font-size:11px;color:#9AA3A8;letter-spacing:.06em}
+  .savedot{font-family:var(--mono);font-size:10px;color:#7E878C;white-space:nowrap}
 
   .btn{font:inherit;font-size:13px;font-weight:600;letter-spacing:.02em;background:var(--paper);
     color:var(--ink);border:1px solid var(--ink);border-radius:2px;padding:9px 13px;cursor:pointer;
@@ -45,9 +48,10 @@
   .btn--quiet{background:transparent;border-color:var(--rule);color:var(--ink-2)}
   .btn--warn{border-color:var(--red);color:var(--red);font-weight:700}
   .btn--sm{min-height:36px;padding:6px 10px;font-size:12px}
+  .btn--xs{min-height:30px;padding:4px 8px;font-size:11px}
   .btn[disabled]{opacity:.45;cursor:not-allowed}
-  .btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
-    outline:3px solid var(--hv);outline-offset:1px}
+  .btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,
+  button:focus-visible{outline:3px solid var(--hv);outline-offset:1px}
 
   .band{display:flex;align-items:baseline;gap:10px;margin:22px 0 8px}
   .band h2{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin:0}
@@ -64,10 +68,8 @@
     color:var(--ink);font-size:15px}
   input::placeholder,textarea::placeholder{color:#B4BCC0}
   textarea{resize:vertical;min-height:76px;line-height:1.5}
-  select{font-size:13px;font-weight:700;letter-spacing:.04em}
   .val-mono{font-family:var(--mono);font-size:14px}
 
-  /* --- site & weather --- */
   .wx__row{display:flex;gap:10px;align-items:center;padding:11px}
   .wx__now{flex:1;min-width:0}
   .wx__t{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1}
@@ -77,21 +79,28 @@
   .note{font-size:12px;line-height:1.5;color:var(--ink-2);background:#FFF8E6;
     border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);padding:9px 11px}
   .note b{color:var(--ink)}
-  .note--hide{display:none}
   .unit-tog{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden}
   .unit-tog button{font:inherit;font-family:var(--mono);font-size:11px;font-weight:700;
     background:var(--paper);border:0;padding:7px 8px;cursor:pointer;color:var(--ink-3)}
   .unit-tog button[aria-pressed="true"]{background:var(--ink);color:#fff}
   .lrow{display:flex;gap:6px;align-items:center}
   .lrow input{border:1px solid var(--rule-2);padding:8px 9px;font-size:14px;border-radius:2px;min-width:0}
-  .hits{margin-top:6px}
   .hits button{display:block;width:100%;text-align:left;font:inherit;font-size:13px;
     background:var(--paper-2);border:1px solid var(--rule-2);border-radius:2px;
-    padding:8px 9px;margin-bottom:4px;cursor:pointer;color:var(--ink)}
+    padding:8px 9px;margin-top:4px;cursor:pointer;color:var(--ink)}
   .hits button b{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
     color:var(--ink-3);font-family:var(--mono)}
 
-  /* --- observation slip --- */
+  /* project setup panel */
+  .panel{border-top:1px solid var(--rule-2)}
+  .logo-prev{display:flex;align-items:center;gap:10px}
+  .logo-prev img{max-height:44px;max-width:150px;border:1px solid var(--rule-2);background:#fff}
+  .projlist{display:flex;flex-wrap:wrap;gap:6px;padding:9px 11px;border-top:1px solid var(--rule-2)}
+  .projlist button{font:inherit;font-size:12px;background:var(--paper-2);border:1px solid var(--rule-2);
+    border-radius:2px;padding:7px 10px;cursor:pointer;color:var(--ink)}
+  .projlist button[aria-current="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* observation slip */
   .slip{background:var(--paper);border:1px solid var(--rule);box-shadow:var(--shadow);
     margin:0 0 16px;position:relative}
   .slip::before{content:"";position:absolute;left:0;right:0;top:-1px;height:4px;
@@ -100,18 +109,21 @@
   .slip__hd{display:flex;align-items:center;gap:9px;padding:12px 11px 9px}
   .slip__num{font-family:var(--mono);font-size:13px;font-weight:700;background:var(--ink);
     color:#fff;padding:3px 7px;letter-spacing:.05em}
-  .slip__hd select{flex:1;min-width:0;text-transform:uppercase;font-size:12px;letter-spacing:.08em}
   .tag{width:10px;height:26px;flex:none;background:var(--ink-3)}
+  .origin{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em;
+    flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .icons{display:flex;gap:4px}
   .ibtn{font:inherit;background:transparent;border:1px solid var(--rule-2);border-radius:2px;
     width:34px;height:34px;cursor:pointer;color:var(--ink-2);font-size:14px;line-height:1;
     display:flex;align-items:center;justify-content:center}
   .ibtn:active{background:var(--paper-2)}
+  .trio{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 11px 9px}
+  .trio select{border:1px solid var(--rule-2);border-radius:2px;padding:7px 8px;font-size:12px;
+    font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:var(--paper-2)}
+  .trio select.st{grid-column:1/-1}
 
-  /* photo strip: 1 photo goes full width, 2+ tile */
-  .shots{display:grid;gap:3px;grid-template-columns:repeat(3,1fr);
-    background:var(--paper-2);border-top:1px solid var(--rule-2);
-    border-bottom:1px solid var(--rule-2);padding:3px}
+  .shots{display:grid;gap:3px;grid-template-columns:repeat(3,1fr);background:var(--paper-2);
+    border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);padding:3px}
   .shots--one{grid-template-columns:1fr}
   .shots--empty{display:none}
   .shot{position:relative;background:#20252a;overflow:hidden;aspect-ratio:1/1}
@@ -121,14 +133,19 @@
   .shot__x{position:absolute;top:3px;right:3px;width:30px;height:30px;border-radius:50%;
     border:0;background:rgba(21,24,27,.72);color:#fff;font-size:15px;line-height:1;cursor:pointer;
     display:flex;align-items:center;justify-content:center;padding:0}
+  .shot__mk{position:absolute;bottom:3px;right:3px;border:0;border-radius:2px;
+    background:rgba(21,24,27,.72);color:#fff;font-size:11px;font-weight:600;padding:4px 7px;cursor:pointer}
   .shot__n{position:absolute;left:0;bottom:0;font-family:var(--mono);font-size:9.5px;
     background:rgba(21,24,27,.72);color:#fff;padding:2px 5px;letter-spacing:.06em}
-  .shotbar{display:flex;gap:6px;padding:8px 11px;border-bottom:1px solid var(--rule-2);
-    align-items:center}
-  .shotbar .ct{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);
-    letter-spacing:.08em;margin-left:auto}
+  .shotbar{display:flex;gap:6px;padding:8px 11px;border-bottom:1px solid var(--rule-2);align-items:center}
+  .shotbar .ct{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.08em;margin-left:auto}
 
   .field{padding:9px 11px;border-bottom:1px solid var(--rule-2)}
+  .loc3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .loc3 input{border:1px solid var(--rule-2);border-radius:2px;padding:7px 8px;font-size:14px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .chips button{font:inherit;font-size:11px;font-family:var(--mono);background:var(--paper-2);
+    border:1px solid var(--rule-2);border-radius:2px;padding:5px 7px;cursor:pointer;color:var(--ink-2)}
   .ta{position:relative}
   .ta textarea{padding-right:52px}
   .mic{position:absolute;right:6px;top:2px;width:42px;height:42px;border-radius:50%;
@@ -151,23 +168,52 @@
   .dock .btn--quiet{background:#262B2F;border-color:#3C444A;color:#E6EAEC}
 
   .toast{position:fixed;left:50%;transform:translateX(-50%);
-    bottom:calc(96px + env(safe-area-inset-bottom));z-index:60;background:var(--ink);color:#fff;
+    bottom:calc(100px + env(safe-area-inset-bottom));z-index:90;background:var(--ink);color:#fff;
     padding:10px 15px;font-size:13px;border-radius:2px;box-shadow:var(--shadow);max-width:92vw;
     border-left:4px solid var(--hv);display:flex;align-items:center;gap:14px}
   .toast .btn{background:var(--hv);border-color:var(--hv);color:var(--hv-ink);min-height:32px;
     padding:5px 11px;font-size:12px;font-weight:700;flex:none}
-  .lightbox{position:fixed;inset:0;background:rgba(10,12,14,.95);z-index:80;display:flex;
-    flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:12px}
-  .lightbox img{max-width:100%;max-height:82vh;object-fit:contain}
-  .lightbox .lbnav{display:flex;gap:10px;align-items:center}
-  .lightbox .lbnav .mono{color:#C9D0D4;font-size:12px}
+
+  /* overlays: lightbox, markup, carry-forward */
+  .ov{position:fixed;inset:0;background:rgba(10,12,14,.95);z-index:80;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;padding:12px;gap:10px}
+  .ov img{max-width:100%;max-height:80vh;object-fit:contain}
+  .ovbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .ovbar .mono{color:#C9D0D4;font-size:12px}
+  .ovsheet{background:var(--paper);width:100%;max-width:560px;max-height:86vh;overflow:auto;
+    border-radius:3px}
+  .ovsheet h3{margin:0;padding:12px 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    border-bottom:1px solid var(--rule-2)}
+  .cf{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--rule-2);align-items:flex-start}
+  .cf input[type=checkbox]{width:22px;height:22px;flex:none;margin-top:2px}
+  .cf img{width:54px;height:54px;object-fit:cover;flex:none;background:#20252a}
+  .cf .cfb{min-width:0;flex:1}
+  .cf .cfm{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em}
+  .cf .cft{font-size:13px;line-height:1.4}
+  .ovfoot{display:flex;gap:8px;padding:11px 14px;position:sticky;bottom:0;background:var(--paper);
+    border-top:1px solid var(--rule-2)}
+  .mkwrap{position:relative;background:#111;touch-action:none}
+  .mkwrap canvas{display:block;max-width:100%;touch-action:none}
+  .tool{font:inherit;font-size:12px;font-weight:700;background:#262B2F;color:#E6EAEC;
+    border:1px solid #3C444A;border-radius:2px;padding:8px 10px;cursor:pointer;min-height:38px}
+  .tool[aria-pressed="true"]{background:var(--hv);color:var(--hv-ink);border-color:var(--hv)}
+  .sw{width:32px;height:32px;border-radius:50%;border:2px solid #fff;cursor:pointer;padding:0}
+  .sw[aria-pressed="true"]{outline:3px solid var(--hv);outline-offset:2px}
+  .mktext{border:1px solid #3C444A;background:#1B1F22;color:#fff;border-radius:2px;
+    padding:8px;font-size:14px;min-width:150px;flex:1}
+
   .foot{padding:18px 0 6px;font-size:12px;color:var(--ink-2);line-height:1.6}
   .foot h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
   .foot code{font-family:var(--mono);font-size:11px}
   .rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .optrow{display:flex;flex-wrap:wrap;gap:14px;padding:10px 11px;font-size:13px;color:var(--ink-2)}
+  .optrow label{display:flex;align-items:center;gap:7px;cursor:pointer}
+  .optrow input[type=checkbox]{width:20px;height:20px}
+  .optrow select{width:auto;border:1px solid var(--rule-2);border-radius:2px;padding:5px 7px;font-size:13px}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media (min-width:620px){ .trio{grid-template-columns:1fr 1fr 1fr} .trio select.st{grid-column:auto} }
   @media print{
-    .topbar,.dock,.foot,.icons,.mic,.unit-tog,.shot__x,.shotbar,.note{display:none!important}
+    .topbar,.dock,.foot,.icons,.mic,.unit-tog,.shot__x,.shot__mk,.shotbar,.note{display:none!important}
     body{background:#fff;padding:0}
     .slip{break-inside:avoid;box-shadow:none}
   }
@@ -176,40 +222,122 @@
 <body>
 
 <header class="topbar">
-  <div class="id">
-    <b id="tbProj">Untitled project</b>
-    <span class="mono" id="tbMeta">RPT — · —</span>
-  </div>
+  <button class="id" id="btnProj" title="Project setup">
+    <b id="tbProj">No project</b>
+    <span class="mono" id="tbMeta">Tap to set up</span>
+  </button>
+  <span class="savedot" id="saveDot"></span>
   <button class="btn btn--hv btn--sm" id="btnPdf">Export PDF</button>
 </header>
 
 <div class="wrap">
 
-  <div class="band"><h2>Report</h2><div class="hr"></div></div>
+  <div class="band"><h2>Project</h2><div class="hr"></div>
+    <button class="btn btn--xs btn--quiet" id="btnPanel">Show setup</button></div>
+  <section class="sheet hide" id="projPanel">
+    <div class="projlist" id="projList"></div>
+    <div class="grid panel">
+      <div class="cell full"><label class="lbl" for="p_name">Project name</label>
+        <input id="p_name" data-p="name" placeholder="Green Mountain Veterinary Kennel"></div>
+      <div class="cell"><label class="lbl" for="p_short">Short name for file names</label>
+        <input id="p_short" data-p="shortName" placeholder="263 Summer Street"></div>
+      <div class="cell"><label class="lbl" for="p_number">Project no.</label>
+        <input id="p_number" class="val-mono" data-p="number" placeholder="2431"></div>
+      <div class="cell full"><label class="lbl" for="p_address">Project address</label>
+        <input id="p_address" data-p="address" placeholder="263 Summer Street, Boston MA"></div>
+      <div class="cell"><label class="lbl" for="p_firm">Architect / firm</label>
+        <input id="p_firm" data-p="firm" placeholder="Northfield Architects"></div>
+      <div class="cell"><label class="lbl" for="p_aor">Architect of record</label>
+        <input id="p_aor" data-p="aor" placeholder="R. Shan, AIA"></div>
+      <div class="cell"><label class="lbl" for="p_firmContact">Firm address / phone</label>
+        <input id="p_firmContact" data-p="firmContact" placeholder="12 Portland St · 802 555 0134"></div>
+      <div class="cell"><label class="lbl" for="p_contractor">Contractor</label>
+        <input id="p_contractor" data-p="contractor" placeholder="Balfour Construction LLC"></div>
+      <div class="cell full"><label class="lbl" for="p_owner">Owner / client</label>
+        <input id="p_owner" data-p="owner" placeholder="Green Mountain Veterinary Group"></div>
+      <div class="cell full"><label class="lbl" for="p_dist">Distribution list (one per line)</label>
+        <textarea id="p_dist" data-p="distribution" style="min-height:64px"
+          placeholder="T. Ruiz — Owner&#10;J. Mercier — GC&#10;File"></textarea></div>
+      <div class="cell full"><label class="lbl" for="p_disc">Disciplines (comma separated)</label>
+        <input id="p_disc" data-p="disciplinesRaw"
+          placeholder="General, Architectural, Structural, MEP"></div>
+      <div class="cell"><label class="lbl" for="p_next">Next report no.</label>
+        <input id="p_next" class="val-mono" data-p="nextReportNo" inputmode="numeric" placeholder="1"></div>
+      <div class="cell"><label class="lbl" for="p_digits">Number padding</label>
+        <select id="p_digits" data-p="digits">
+          <option value="1">7</option><option value="2">07</option>
+          <option value="3" selected>007</option><option value="4">0007</option></select></div>
+      <div class="cell full"><label class="lbl" for="p_footer">PDF footer line</label>
+        <input id="p_footer" data-p="footer" placeholder="Northfield Architects · Field observation report"></div>
+      <div class="cell full"><label class="lbl">Company logo</label>
+        <div class="logo-prev">
+          <img id="p_logoImg" class="hide" alt="Company logo">
+          <button class="btn btn--sm btn--quiet" id="btnLogo">Choose logo</button>
+          <button class="btn btn--sm btn--quiet hide" id="btnLogoX">Remove</button>
+        </div></div>
+    </div>
+    <div class="optrow" style="border-top:1px solid var(--rule-2)">
+      <button class="btn btn--sm btn--quiet" id="btnProjNew">New project</button>
+      <button class="btn btn--sm btn--quiet" id="btnProjDup">Duplicate as template</button>
+      <button class="btn btn--sm btn--quiet" id="btnProjDel">Delete project</button>
+    </div>
+
+    <h3 style="margin:0;padding:11px 11px 0;font-size:11px;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--ink-3)">Online archive (GitHub)</h3>
+    <div class="grid" style="border-top:0">
+      <div class="cell" style="border-top:0"><label class="lbl" for="g_owner">Account / owner</label>
+        <input id="g_owner" class="val-mono" data-p="ghOwner" placeholder="your-username"
+          autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="cell" style="border-top:0"><label class="lbl" for="g_repo">Repository (keep it private)</label>
+        <input id="g_repo" class="val-mono" data-p="ghRepo" placeholder="field-reports-data"
+          autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="cell"><label class="lbl" for="g_path">Folder</label>
+        <input id="g_path" class="val-mono" data-p="ghPath" placeholder="reports"
+          autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="cell"><label class="lbl" for="g_branch">Branch</label>
+        <input id="g_branch" class="val-mono" data-p="ghBranch" placeholder="main"
+          autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="cell full"><label class="lbl" for="g_token">Access token</label>
+        <input id="g_token" class="val-mono" data-p="ghToken" type="password"
+          placeholder="github_pat_… (stays on this device)"
+          autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    </div>
+    <div class="note" id="ghNote">
+      <b>Read this before pasting a token.</b> Use a <b>fine-grained</b> token limited to this one
+      repository, with <b>Contents: read and write</b> and nothing else. It's stored in this browser
+      only, is never written into exported files, and is never sent anywhere except github.com.
+      Anyone who unlocks this phone can reach that one repo. Reading a <em>public</em> repo needs no
+      token at all — but a public repo means your site photos and client names are readable by anyone,
+      so a private repo is the right choice for construction administration records.
+    </div>
+    <div class="optrow" style="border-bottom:1px solid var(--rule-2)">
+      <button class="btn btn--sm" id="btnGhPush">Push this report</button>
+      <button class="btn btn--sm" id="btnGhPull">Pull open items</button>
+      <button class="btn btn--sm btn--quiet" id="btnGhList">Browse archive</button>
+      <button class="btn btn--sm btn--quiet" id="btnGhTest">Test connection</button>
+    </div>
+    <div class="wx__meta" id="ghStatus" style="border-top:0"></div>
+  </section>
+
+  <div class="band"><h2>This visit</h2><div class="hr"></div></div>
   <section class="sheet">
     <div class="grid">
-      <div class="cell"><label class="lbl" for="m_projectName">Project</label>
-        <input id="m_projectName" data-k="projectName" placeholder="Project name"></div>
-      <div class="cell"><label class="lbl" for="m_projectNo">Project no.</label>
-        <input id="m_projectNo" class="val-mono" data-k="projectNo" placeholder="0000"></div>
       <div class="cell"><label class="lbl" for="m_reportNo">Report no.</label>
-        <input id="m_reportNo" class="val-mono" data-k="reportNo" placeholder="001"></div>
+        <input id="m_reportNo" class="val-mono" data-k="reportNo" placeholder="007"></div>
       <div class="cell"><label class="lbl" for="m_date">Date of visit</label>
         <input id="m_date" class="val-mono" data-k="date" type="date"></div>
       <div class="cell"><label class="lbl" for="m_arrive">Arrived</label>
         <input id="m_arrive" class="val-mono" data-k="arrive" type="time"></div>
       <div class="cell"><label class="lbl" for="m_depart">Departed</label>
         <input id="m_depart" class="val-mono" data-k="depart" type="time"></div>
-      <div class="cell"><label class="lbl" for="m_author">Observed by</label>
-        <input id="m_author" data-k="author" placeholder="Name, title"></div>
-      <div class="cell"><label class="lbl" for="m_firm">Firm</label>
-        <input id="m_firm" data-k="firm" placeholder="Architect of record"></div>
-      <div class="cell full"><label class="lbl" for="m_contractor">Contractor</label>
-        <input id="m_contractor" data-k="contractor" placeholder="General contractor"></div>
       <div class="cell full"><label class="lbl" for="m_present">Present on site</label>
         <input id="m_present" data-k="present" placeholder="Names and companies"></div>
       <div class="cell full"><label class="lbl" for="m_notes">General notes</label>
         <textarea id="m_notes" data-k="notes" placeholder="Purpose of visit, work in progress, trades on site, schedule status…"></textarea></div>
+    </div>
+    <div class="optrow" style="border-top:1px solid var(--rule-2)" id="cfRow">
+      <button class="btn btn--sm" id="btnCarry">Carry forward open items</button>
+      <button class="btn btn--sm btn--quiet" id="btnCarryFile">Import from a saved report</button>
     </div>
   </section>
 
@@ -226,14 +354,12 @@
       </div>
       <button class="btn btn--sm" id="btnLoc">Use my location</button>
     </div>
-    <div class="wx__meta" id="wxMeta">Set the site location and the weather fills in automatically — for the report and for every photo, matched to the hour it was taken.</div>
-
-    <div class="note note--hide" id="locNote"></div>
-
+    <div class="wx__meta" id="wxMeta">Set the site location once and the weather fills in automatically, for the report and for every photo.</div>
+    <div class="note hide" id="locNote"></div>
     <div class="field">
       <label class="lbl" for="placeQ">Or find the site by address</label>
       <div class="lrow">
-        <input id="placeQ" placeholder="123 Main St, Morrisville VT" enterkeyhint="search">
+        <input id="placeQ" placeholder="263 Summer Street, Boston MA" enterkeyhint="search">
         <button class="btn btn--sm" id="btnFind">Search</button>
       </div>
       <div class="hits" id="placeHits"></div>
@@ -241,13 +367,13 @@
     <div class="field">
       <label class="lbl" for="latIn">Or enter coordinates</label>
       <div class="lrow">
-        <input id="latIn" class="val-mono" inputmode="decimal" placeholder="44.55987">
-        <input id="lonIn" class="val-mono" inputmode="decimal" placeholder="-72.59842">
+        <input id="latIn" class="val-mono" inputmode="decimal" placeholder="42.34686">
+        <input id="lonIn" class="val-mono" inputmode="decimal" placeholder="-71.04561">
         <button class="btn btn--sm" id="btnSetXY">Set</button>
       </div>
     </div>
     <div class="field" style="border-bottom:0">
-      <label class="lbl" for="m_wxNote">Weather as reported (auto-filled, editable — this prints on the PDF)</label>
+      <label class="lbl" for="m_wxNote">Weather as reported (auto-filled, editable)</label>
       <input id="m_wxNote" data-k="wxNote" placeholder="e.g. 71°F, partly cloudy, light wind, ground dry">
     </div>
   </section>
@@ -256,46 +382,68 @@
   <section id="obsList"></section>
   <div class="empty" id="empty">
     <b>No observations yet</b>
-    <strong>Take photo</strong> starts a new numbered observation. <strong>Add photos</strong> puts
-    everything you select into one observation — for several angles of the same condition.
+    <strong>Take photo</strong> starts a new numbered item. <strong>Add photos</strong> puts everything
+    you select into one item. Carry forward brings open items from the last report.
   </div>
 
+  <div class="band"><h2>Export</h2><div class="hr"></div></div>
+  <section class="sheet">
+    <div class="optrow">
+      <label><input type="checkbox" id="o_onePer"> One observation per page</label>
+      <label><input type="checkbox" id="o_group"> Group by discipline</label>
+      <label><input type="checkbox" id="o_openFirst"> Open items first</label>
+    </div>
+    <div class="optrow" style="border-top:1px solid var(--rule-2)">
+      <label>Date format
+        <select id="o_dfmt">
+          <option value="iso">2026-08-14</option>
+          <option value="us">08.14.2026</option>
+          <option value="long">14 August 2026</option>
+        </select></label>
+      <label>Photos per row
+        <select id="o_perRow"><option>2</option><option selected>3</option><option>4</option></select></label>
+    </div>
+    <div class="wx__meta" id="fnPrev"></div>
+  </section>
+
   <div class="rowbtns">
+    <button class="btn btn--sm" id="btnFinish">Finish &amp; file report</button>
     <button class="btn btn--quiet btn--sm" id="btnSave">Save report file</button>
     <button class="btn btn--quiet btn--sm" id="btnOpen">Open report file</button>
-    <button class="btn btn--quiet btn--sm" id="btnClear">Start new report</button>
+    <button class="btn btn--quiet btn--sm" id="btnClear">Start next report</button>
   </div>
 
   <div class="foot">
-    <h3>Running this in the field</h3>
-    Phone GPS, the microphone, and weather lookups only work when the page is served from an
-    <code>https://</code> address and opened as its own page — not inside an app's preview frame.
-    Put the file on GitHub Pages, Netlify Drop, or your office server, open it in Safari or Chrome,
-    then add it to your home screen. Weather comes from Open-Meteo, address lookups from
-    OpenStreetMap. Work in progress lives in this tab only — <strong>Save report file</strong> before
-    you close it.
+    <h3>Notes</h3>
+    Project setup, disciplines, recent locations, report numbering and the filed-report archive are
+    saved in this browser, so they persist between visits on this device. The archive keeps text and
+    small reference thumbnails only — <strong>Save report file</strong> is still the full record, and
+    the one to keep or hand off. Location, microphone and weather need the page served over
+    <code>https://</code> as its own tab.
   </div>
 </div>
 
 <div class="dock">
   <button class="btn btn--hv" id="btnCam">Take photo</button>
   <button class="btn btn--quiet" id="btnLib">Add photos</button>
-  <button class="btn btn--quiet" id="btnNote" title="Observation without a photo">Note</button>
+  <button class="btn btn--quiet" id="btnNote">Note</button>
 </div>
 
 <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fileLib" accept="image/*" multiple hidden>
 <input type="file" id="fileJson" accept=".json,application/json" hidden>
+<input type="file" id="fileCarry" accept=".json,application/json" hidden>
+<input type="file" id="fileLogo" accept="image/*" hidden>
 
 <script>
 "use strict";
 /* ============================================================
    Field Report — construction administration
-   v2: multi-photo observations, three ways to set site location,
-       automatic weather per observation.
+   v3: project templates, carry-forward, photo markup,
+       discipline/status, persistence, PDF pagination controls.
    ============================================================ */
 
-const CATS = [
+const TYPES = [
   ["Observation",        "#4A5157"],
   ["Work in progress",   "#3B4CA0"],
   ["Conforming",         "#2C7A51"],
@@ -305,7 +453,18 @@ const CATS = [
   ["Delay / weather",    "#7A6A2C"],
   ["Action required",    "#BF3126"]
 ];
-const CATC = Object.fromEntries(CATS);
+const TYPEC = Object.fromEntries(TYPES);
+const STATUSES = [
+  ["New","#4A5157"],
+  ["Open","#BF3126"],
+  ["Ongoing","#D98200"],
+  ["Contractor response required","#3B4CA0"],
+  ["Closed","#2C7A51"]
+];
+const STATC = Object.fromEntries(STATUSES);
+const DEF_DISC = ["General","Architectural","Structural","MEP","Fire protection / life safety",
+                  "Civil / site","Interiors","Punch list"];
+const OPEN_STATES = ["New","Open","Ongoing","Contractor response required"];
 
 const WMO = {0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Freezing fog",
 51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",56:"Light freezing drizzle",57:"Freezing drizzle",
@@ -314,22 +473,33 @@ const WMO = {0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"F
 82:"Violent rain showers",85:"Light snow showers",86:"Snow showers",95:"Thunderstorm",
 96:"Thunderstorm, slight hail",99:"Thunderstorm, heavy hail"};
 
+const LSKEY="fieldreport.v3";
+const MARK_COLORS=["#E02B20","#F2C200","#FFFFFF","#1C6FE0"];
+
+function blankProject(name){
+  return {id:"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    name:name||"", shortName:"", number:"", address:"", firm:"", aor:"", firmContact:"",
+    contractor:"", owner:"", distribution:"", disciplinesRaw:DEF_DISC.join(", "),
+    nextReportNo:1, digits:3, footer:"", logo:null, places:[], history:[],
+    ghOwner:"", ghRepo:"", ghPath:"reports", ghBranch:"main", ghToken:"", ghLast:""};
+}
+
 const state = {
-  meta:{projectName:"",projectNo:"",reportNo:"",date:todayISO(),arrive:"",depart:"",author:"",
-        firm:"",contractor:"",present:"",notes:"",wxNote:""},
+  project: blankProject(""),
+  meta:{reportNo:"",date:todayISO(),arrive:"",depart:"",present:"",notes:"",wxNote:""},
   site:{lat:null,lon:null,address:""},
   wxNow:null,
   units:"us",
+  opts:{onePer:false,group:false,openFirst:false,dfmt:"iso",perRow:3},
   obs:[]
 };
-const cards = new Map();
-const wxCache = new Map();
-let seq = 0;
+let projects={}, seq=0;
+const cards=new Map(), wxCache=new Map();
 
 /* ---------------- helpers ---------------- */
 const $ = s => document.querySelector(s);
 function todayISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);}
-function pad(n){return String(n).padStart(2,"0");}
+function pad(n,w){return String(n).padStart(w||2,"0");}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function toast(msg,ms=3200){
   const t=document.createElement("div");t.className="toast";
@@ -337,7 +507,6 @@ function toast(msg,ms=3200){
   document.body.appendChild(t);setTimeout(()=>t.remove(),ms);
   return t;
 }
-/* stands in for confirm(), which embedded frames block */
 function toastAction(msg,label,fn,ms=7000){
   const t=toast(msg,ms);
   const b=document.createElement("button");
@@ -355,23 +524,215 @@ function localStamp(d){
 function prettyTime(iso){ if(!iso) return "—"; const [d,t]=iso.split("T"); return d+" "+t; }
 function clockOnly(iso){ return iso&&iso.includes("T") ? iso.split("T")[1] : ""; }
 function coordStr(lat,lon){ return (lat==null||lon==null)?"—":Number(lat).toFixed(5)+", "+Number(lon).toFixed(5); }
+function disciplines(){
+  const raw=(state.project.disciplinesRaw||"").split(",").map(s=>s.trim()).filter(Boolean);
+  return raw.length?raw:DEF_DISC;
+}
+function fmtDate(iso){
+  if(!iso) return "";
+  const [y,m,d]=iso.split("-");
+  if(state.opts.dfmt==="us") return m+"."+d+"."+y;
+  if(state.opts.dfmt==="long"){
+    const MO=["January","February","March","April","May","June","July","August",
+              "September","October","November","December"];
+    return String(Number(d))+" "+MO[Number(m)-1]+" "+y;
+  }
+  return iso;
+}
+function placeStr(o){ return [o.floor,o.room,o.area].filter(Boolean).join(" · "); }
+function safeName(s){ return String(s||"").replace(/[\/\\:*?"<>|]+/g,"-").replace(/\s+/g," ").trim(); }
+function reportFileBase(){
+  const p=state.project;
+  const who=safeName(p.shortName||p.name||"Field Report");
+  const no=state.meta.reportNo||"";
+  return [who,"Field Report"+(no?" "+no:""),fmtDate(state.meta.date||todayISO())].join("_");
+}
 
-/* ---------------- meta form ---------------- */
+/* ---------------- persistence ---------------- */
+const store={
+  ok:true,
+  load(){
+    try{
+      const raw=localStorage.getItem(LSKEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ this.ok=false; return null; }
+  },
+  save(v){
+    try{ localStorage.setItem(LSKEY,JSON.stringify(v)); return true; }
+    catch(e){
+      this.ok=false;
+      toast("Couldn't save to this browser's storage — it may be full or blocked. Use Save report file.",6000);
+      return false;
+    }
+  }
+};
+let saveTimer=null;
+function writeNow(){
+  clearTimeout(saveTimer); saveTimer=null;
+  projects[state.project.id]=state.project;
+  const ok=store.save({v:3,projects,current:state.project.id,opts:state.opts,units:state.units});
+  const d=$("#saveDot");
+  if(d) d.textContent = ok ? "saved "+new Date().toTimeString().slice(0,5) : "not saved";
+  return ok;
+}
+function persist(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(writeNow,600);
+}
+/* iOS frequently skips beforeunload, so flush on every hide as well */
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") writeNow(); });
+window.addEventListener("pagehide",writeNow);
+
+/* ---------------- project panel ---------------- */
+function bindProjectFields(){
+  document.querySelectorAll("[data-p]").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      const k=inp.dataset.p;
+      state.project[k] = (k==="nextReportNo"||k==="digits") ? (parseInt(inp.value,10)||1) : inp.value;
+      if(k==="name"||k==="number") paintTopbar();
+      if(k==="disciplinesRaw") state.obs.forEach(refillDisc);
+      paintFilename();
+      persist();
+    });
+  });
+}
+function syncProjectForm(){
+  document.querySelectorAll("[data-p]").forEach(i=>{
+    const v=state.project[i.dataset.p];
+    i.value = v==null?"":v;
+  });
+  const img=$("#p_logoImg");
+  if(state.project.logo){ img.src=state.project.logo.url; img.classList.remove("hide"); $("#btnLogoX").classList.remove("hide"); }
+  else { img.classList.add("hide"); $("#btnLogoX").classList.add("hide"); }
+  paintProjList();
+}
+function paintProjList(){
+  const box=$("#projList");
+  const ids=Object.keys(projects);
+  box.innerHTML="";
+  ids.forEach(id=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.textContent=projects[id].name||projects[id].shortName||"Untitled project";
+    if(id===state.project.id) b.setAttribute("aria-current","true");
+    b.addEventListener("click",()=>switchProject(id));
+    box.appendChild(b);
+  });
+  const hint=document.createElement("span");
+  hint.className="dim";hint.style.fontSize="12px";hint.style.alignSelf="center";
+  hint.textContent = ids.length>1 ? "" : "One project so far.";
+  box.appendChild(hint);
+}
+function switchProject(id){
+  if(!projects[id] || id===state.project.id) return;
+  if(state.obs.length){
+    toastAction("Switch project? This visit's observations stay unsaved.","Switch",()=>doSwitch(id));
+    return;
+  }
+  doSwitch(id);
+}
+function doSwitch(id){
+  projects[state.project.id]=state.project;
+  state.project=projects[id];
+  resetVisit(false);
+  syncProjectForm(); paintTopbar(); paintCarry(); paintFilename(); persist();
+  toast("Switched to "+(state.project.name||"project")+".");
+}
+$("#btnPanel").addEventListener("click",()=>{
+  const p=$("#projPanel"), on=p.classList.toggle("hide");
+  $("#btnPanel").textContent = on ? "Show setup" : "Hide setup";
+});
+$("#btnProj").addEventListener("click",()=>{
+  $("#projPanel").classList.remove("hide");
+  $("#btnPanel").textContent="Hide setup";
+  $("#p_name").focus();
+});
+$("#btnProjNew").addEventListener("click",()=>{
+  const p=blankProject("");
+  projects[p.id]=p; state.project=p; resetVisit(false);
+  syncProjectForm(); paintTopbar(); paintCarry(); persist();
+  $("#p_name").focus();
+  toast("New project. Fill in the details once and they carry to every report.");
+});
+$("#btnProjDup").addEventListener("click",()=>{
+  const c=JSON.parse(JSON.stringify(state.project));
+  c.id=blankProject("").id; c.name=(c.name||"Project")+" (copy)";
+  c.history=[]; c.nextReportNo=1;
+  projects[c.id]=c; state.project=c; resetVisit(false);
+  syncProjectForm(); paintTopbar(); paintCarry(); persist();
+  toast("Duplicated as a fresh project — branding kept, history cleared.");
+});
+let delArmed=false;
+$("#btnProjDel").addEventListener("click",()=>{
+  const b=$("#btnProjDel");
+  if(!delArmed){
+    delArmed=true; b.textContent="Tap again to delete"; b.classList.add("btn--warn");
+    setTimeout(()=>{delArmed=false;b.textContent="Delete project";b.classList.remove("btn--warn");},4000);
+    return;
+  }
+  delArmed=false; b.textContent="Delete project"; b.classList.remove("btn--warn");
+  delete projects[state.project.id];
+  const rest=Object.keys(projects);
+  state.project = rest.length ? projects[rest[0]] : blankProject("");
+  projects[state.project.id]=state.project;
+  resetVisit(false); syncProjectForm(); paintTopbar(); paintCarry(); persist();
+  toast("Project deleted.");
+});
+$("#btnLogo").addEventListener("click",()=>$("#fileLogo").click());
+$("#fileLogo").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value="";
+  if(!f) return;
+  try{
+    const bmp=await decode(f);
+    state.project.logo=resample(bmp,420,0.9);
+    if(bmp.close) bmp.close();
+    syncProjectForm(); persist();
+    toast("Logo saved to this project. It prints on every report.");
+  }catch(err){ toast("Couldn't read that image."); }
+});
+$("#btnLogoX").addEventListener("click",()=>{
+  state.project.logo=null; syncProjectForm(); persist();
+});
+
+/* ---------------- visit form ---------------- */
 document.querySelectorAll("[data-k]").forEach(inp=>{
-  inp.value = state.meta[inp.dataset.k] ?? "";
-  inp.addEventListener("input",()=>{ state.meta[inp.dataset.k]=inp.value; paintTopbar(); });
+  inp.addEventListener("input",()=>{
+    state.meta[inp.dataset.k]=inp.value;
+    paintTopbar(); paintFilename();
+  });
 });
 function paintTopbar(){
-  $("#tbProj").textContent = state.meta.projectName || "Untitled project";
+  $("#tbProj").textContent = state.project.name || state.project.shortName || "No project";
   const bits=["RPT "+(state.meta.reportNo||"—"), state.meta.date||"—"];
-  if(state.meta.projectNo) bits.push("#"+state.meta.projectNo);
+  if(state.project.number) bits.push("#"+state.project.number);
   $("#tbMeta").textContent=bits.join(" · ");
 }
-function syncMetaForm(){
-  document.querySelectorAll("[data-k]").forEach(i=>{ i.value = state.meta[i.dataset.k] ?? ""; });
-  paintTopbar();
+function syncVisitForm(){
+  document.querySelectorAll("[data-k]").forEach(i=>{ i.value=state.meta[i.dataset.k] ?? ""; });
+  paintTopbar(); paintFilename();
 }
-paintTopbar();
+function paintFilename(){
+  $("#fnPrev").textContent="Will export as  "+reportFileBase()+".pdf";
+}
+function nextReportNumber(){
+  const p=state.project;
+  return pad(p.nextReportNo||1, p.digits||3);
+}
+
+/* ---------------- export options ---------------- */
+[["o_onePer","onePer"],["o_group","group"],["o_openFirst","openFirst"]].forEach(([id,k])=>{
+  $("#"+id).addEventListener("change",e=>{ state.opts[k]=e.target.checked; persist(); });
+});
+$("#o_dfmt").addEventListener("change",e=>{ state.opts.dfmt=e.target.value; paintFilename(); persist(); });
+$("#o_perRow").addEventListener("change",e=>{ state.opts.perRow=parseInt(e.target.value,10)||3; persist(); });
+function syncOpts(){
+  $("#o_onePer").checked=!!state.opts.onePer;
+  $("#o_group").checked=!!state.opts.group;
+  $("#o_openFirst").checked=!!state.opts.openFirst;
+  $("#o_dfmt").value=state.opts.dfmt||"iso";
+  $("#o_perRow").value=String(state.opts.perRow||3);
+}
 
 /* ---------------- units ---------------- */
 $("#uUS").addEventListener("click",()=>setUnits("us"));
@@ -384,10 +745,11 @@ function setUnits(u){
   wxCache.clear();
   if(state.site.lat!=null) loadSiteWeather();
   state.obs.forEach(o=>{ if(o.lat!=null){ o.wx=null; attachWeather(o); } });
+  persist();
 }
 
 /* ============================================================
-   EXIF: GPS + original timestamp
+   EXIF
    ============================================================ */
 async function readExif(file){
   try{
@@ -467,7 +829,7 @@ async function readExif(file){
 }
 
 /* ============================================================
-   Image decode + downscale
+   Images
    ============================================================ */
 async function decode(file){
   try{ return await createImageBitmap(file,{imageOrientation:"from-image"}); }catch(_){}
@@ -488,9 +850,72 @@ function resample(src,maxDim,quality){
   g.imageSmoothingQuality="high";g.drawImage(src,0,0,w,h);
   return {url:c.toDataURL("image/jpeg",quality),w,h};
 }
+function loadImg(url){
+  return new Promise((res,rej)=>{
+    const i=new Image();
+    i.onload=()=>res(i);
+    i.onerror=()=>rej(new Error("image load"));
+    i.src=url;
+  });
+}
+
+/* ---------- annotation rendering (normalised 0..1 coords) ---------- */
+function drawMarks(ctx,marks,W,H){
+  if(!marks||!marks.length) return;
+  const unit=Math.max(W,H);
+  ctx.lineJoin="round"; ctx.lineCap="round";
+  marks.forEach(m=>{
+    const x1=m.x1*W, y1=m.y1*H, x2=(m.x2??m.x1)*W, y2=(m.y2??m.y1)*H;
+    ctx.strokeStyle=m.color||"#E02B20";
+    ctx.fillStyle=m.color||"#E02B20";
+    ctx.lineWidth=Math.max(2,unit*0.007);
+    if(m.type==="rect"){
+      ctx.strokeRect(Math.min(x1,x2),Math.min(y1,y2),Math.abs(x2-x1),Math.abs(y2-y1));
+    }else if(m.type==="ellipse"){
+      ctx.beginPath();
+      ctx.ellipse((x1+x2)/2,(y1+y2)/2,Math.abs(x2-x1)/2,Math.abs(y2-y1)/2,0,0,Math.PI*2);
+      ctx.stroke();
+    }else if(m.type==="arrow"){
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      const a=Math.atan2(y2-y1,x2-x1), hl=Math.max(10,unit*0.032);
+      ctx.beginPath();
+      ctx.moveTo(x2,y2);
+      ctx.lineTo(x2-hl*Math.cos(a-Math.PI/7), y2-hl*Math.sin(a-Math.PI/7));
+      ctx.lineTo(x2-hl*Math.cos(a+Math.PI/7), y2-hl*Math.sin(a+Math.PI/7));
+      ctx.closePath(); ctx.fill();
+    }else if(m.type==="text"){
+      const fs=Math.max(13,unit*0.045);
+      ctx.font="700 "+fs+"px "+
+        "system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif";
+      ctx.textBaseline="top";
+      ctx.lineWidth=Math.max(3,fs*0.24);
+      ctx.strokeStyle="rgba(0,0,0,.85)";
+      ctx.strokeText(m.text||"",x1,y1);
+      ctx.fillText(m.text||"",x1,y1);
+    }
+  });
+}
+async function flatten(p,maxDim){
+  const src=p.img;
+  if(!src||!src.url) return null;
+  if(!p.marks||!p.marks.length){
+    if(!maxDim||Math.max(src.w,src.h)<=maxDim) return src;
+  }
+  const img=await loadImg(src.url);
+  const k=maxDim?Math.min(1,maxDim/Math.max(src.w,src.h)):1;
+  const W=Math.max(1,Math.round(src.w*k)), H=Math.max(1,Math.round(src.h*k));
+  const c=document.createElement("canvas"); c.width=W; c.height=H;
+  const g=c.getContext("2d");
+  g.drawImage(img,0,0,W,H);
+  drawMarks(g,p.marks,W,H);
+  return {url:c.toDataURL("image/jpeg",0.85),w:W,h:H};
+}
+async function refreshThumb(p){
+  try{ const t=await flatten(p,760); if(t) p.thumb=t.url; }catch(e){}
+}
 
 /* ============================================================
-   Location — GPS, address search, or typed coordinates
+   Location + weather
    ============================================================ */
 function locBlocker(){
   if(!("geolocation" in navigator)) return "This browser has no location feature.";
@@ -498,15 +923,13 @@ function locBlocker(){
     return "Location needs an https:// address. This page is open from a local file, so the phone won't share GPS.";
   try{ if(window.self!==window.top)
     return "This preview frame blocks GPS. Open the file as its own page in Safari or Chrome and it will work.";
-  }catch(e){
-    return "This preview frame blocks GPS. Open the file as its own page in Safari or Chrome and it will work.";
-  }
+  }catch(e){ return "This preview frame blocks GPS. Open the file as its own page."; }
   return null;
 }
 function showLocNote(html){
   const n=$("#locNote");
-  if(!html){ n.classList.add("note--hide"); n.innerHTML=""; return; }
-  n.classList.remove("note--hide"); n.innerHTML=html;
+  if(!html){ n.classList.add("hide"); n.innerHTML=""; return; }
+  n.classList.remove("hide"); n.innerHTML=html;
 }
 function getPosition(timeout=15000){
   return new Promise((res,rej)=>{
@@ -521,49 +944,33 @@ $("#btnLoc").addEventListener("click",async()=>{
   const blocked=locBlocker();
   if(blocked){
     showLocNote("<b>Can't reach GPS.</b> "+esc(blocked)+
-      " Meanwhile, search the address or type coordinates below — weather works either way.");
+      " Search the address or type coordinates below — weather works either way.");
     return;
   }
   const b=$("#btnLoc"); b.disabled=true; b.textContent="Locating…";
   try{
     const p=await getPosition();
-    showLocNote("");
-    await setSite(p.lat,p.lon,"");
-    toast("Site location set from GPS.");
+    showLocNote(""); await setSite(p.lat,p.lon,""); toast("Site location set from GPS.");
   }catch(err){
     const code=err&&err.code;
-    if(code===1){
-      showLocNote("<b>Location permission was denied.</b> On iPhone: Settings → Privacy &amp; Security → "+
-        "Location Services → on, then Safari Websites → While Using the App. Also check the "+
-        "<strong>aA</strong> menu in Safari's address bar → Website Settings → Location → Allow. "+
-        "On Android Chrome: tap the lock icon in the address bar → Permissions → Location. "+
-        "Or just search the address below — that sets the site and the weather without GPS.");
-    }else if(code===2){
-      showLocNote("<b>No position fix.</b> The phone couldn't reach GPS or wi-fi positioning. "+
-        "Try again outdoors, or search the address below.");
-    }else if(code===3){
-      showLocNote("<b>Location timed out.</b> Try again, or search the address below.");
-    }else{
-      showLocNote("<b>Location unavailable.</b> Search the address or enter coordinates below.");
-    }
+    if(code===1) showLocNote("<b>Location permission was denied.</b> On iPhone: Settings → Privacy &amp; Security → "+
+      "Location Services → on, then Safari Websites → While Using the App. Or search the address below.");
+    else if(code===2) showLocNote("<b>No position fix.</b> Try again outdoors, or search the address below.");
+    else if(code===3) showLocNote("<b>Location timed out.</b> Try again, or search the address below.");
+    else showLocNote("<b>Location unavailable.</b> Search the address or enter coordinates below.");
   }finally{ b.disabled=false; b.textContent="Use my location"; }
 });
-
-/* address search: OpenStreetMap first (handles street addresses),
-   Open-Meteo geocoder as backup (place names) */
 async function geocode(q){
   try{
-    const u="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&q="+encodeURIComponent(q);
-    const r=await fetch(u,{headers:{"Accept":"application/json"}});
+    const r=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&q="+encodeURIComponent(q),
+      {headers:{"Accept":"application/json"}});
     if(r.ok){
       const d=await r.json();
-      if(Array.isArray(d)&&d.length)
-        return d.map(x=>({label:x.display_name,lat:+x.lat,lon:+x.lon}));
+      if(Array.isArray(d)&&d.length) return d.map(x=>({label:x.display_name,lat:+x.lat,lon:+x.lon}));
     }
   }catch(e){}
   try{
-    const u="https://geocoding-api.open-meteo.com/v1/search?count=5&language=en&format=json&name="+encodeURIComponent(q);
-    const r=await fetch(u);
+    const r=await fetch("https://geocoding-api.open-meteo.com/v1/search?count=5&language=en&format=json&name="+encodeURIComponent(q));
     if(r.ok){
       const d=await r.json();
       if(d&&d.results) return d.results.map(x=>({
@@ -579,7 +986,7 @@ async function runSearch(){
   hits.innerHTML='<div class="dim" style="font-size:12px;padding:4px 0">Searching…</div>';
   const res=await geocode(q);
   if(!res.length){
-    hits.innerHTML='<div class="dim" style="font-size:12px;padding:4px 0">No match. Try a nearby intersection or town, or enter coordinates.</div>';
+    hits.innerHTML='<div class="dim" style="font-size:12px;padding:4px 0">No match. Try a nearby intersection, or enter coordinates.</div>';
     return;
   }
   hits.innerHTML="";
@@ -588,8 +995,7 @@ async function runSearch(){
     b.type="button";
     b.innerHTML="<b>"+r.lat.toFixed(4)+", "+r.lon.toFixed(4)+"</b>"+esc(r.label);
     b.addEventListener("click",async()=>{
-      hits.innerHTML=""; $("#placeQ").value="";
-      showLocNote("");
+      hits.innerHTML=""; $("#placeQ").value=""; showLocNote("");
       await setSite(r.lat,r.lon,r.label);
       toast("Site set to "+r.label.split(",")[0]+".");
     });
@@ -601,17 +1007,10 @@ $("#placeQ").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefau
 $("#btnSetXY").addEventListener("click",async()=>{
   const la=parseFloat($("#latIn").value), lo=parseFloat($("#lonIn").value);
   if(!isFinite(la)||!isFinite(lo)||Math.abs(la)>90||Math.abs(lo)>180){
-    toast("Enter a latitude between -90 and 90, and a longitude between -180 and 180.");
-    return;
+    toast("Enter a latitude between -90 and 90, and a longitude between -180 and 180."); return;
   }
-  showLocNote("");
-  await setSite(la,lo,"");
-  toast("Site location set.");
+  showLocNote(""); await setSite(la,lo,""); toast("Site location set.");
 });
-
-/* ============================================================
-   Weather — fetched automatically whenever coordinates are known
-   ============================================================ */
 async function reverseGeocode(lat,lon){
   try{
     const r=await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+lat+"&longitude="+lon+"&localityLanguage=en");
@@ -660,10 +1059,8 @@ function wxText(w){
   if(w.precip) p.push("precip "+w.precip+(state.units==="us"?" in":" mm"));
   return p.join(", ");
 }
-
 async function setSite(lat,lon,label){
-  state.site.lat=lat; state.site.lon=lon;
-  state.site.address=label||"";
+  state.site.lat=lat; state.site.lon=lon; state.site.address=label||"";
   $("#latIn").value=Number(lat).toFixed(5);
   $("#lonIn").value=Number(lon).toFixed(5);
   $("#wxMeta").textContent=coordStr(lat,lon)+" · fetching conditions…";
@@ -676,7 +1073,7 @@ async function loadSiteWeather(){
   if(lat==null) return;
   try{
     const d=await series(lat,lon);
-    const stamp=(state.meta.date&&state.meta.arrive) ? state.meta.date+"T"+state.meta.arrive : localStamp(new Date());
+    const stamp=(state.meta.date&&state.meta.arrive)?state.meta.date+"T"+state.meta.arrive:localStamp(new Date());
     const w=atHour(d,stamp) || (d.current&&{temp:d.current.temperature_2m,rh:d.current.relative_humidity_2m,
       wind:d.current.wind_speed_10m,precip:d.current.precipitation,code:d.current.weather_code,hour:d.current.time});
     state.wxNow=w;
@@ -684,26 +1081,17 @@ async function loadSiteWeather(){
     $("#wxDesc").textContent=w?(WMO[w.code]||"—"):"—";
     $("#wxMeta").textContent=[state.site.address,coordStr(lat,lon),
       w?("at "+prettyTime(w.hour)+" · "+wxText(w)):""].filter(Boolean).join(" · ");
-    if(w){
-      state.meta.wxNote=wxText(w);
-      $("#m_wxNote").value=state.meta.wxNote;
-    }
+    if(w){ state.meta.wxNote=wxText(w); $("#m_wxNote").value=state.meta.wxNote; }
   }catch(e){
     $("#wxMeta").textContent=coordStr(lat,lon)+" · weather lookup failed ("+e.message+")";
-    showLocNote("<b>Weather lookup failed.</b> Embedded preview frames often block outside requests. "+
-      "Open the file as its own page and it will fetch, or type the conditions in the field below.");
   }
 }
-/* any observation still missing coordinates inherits the site's */
 function backfillLocation(){
   state.obs.forEach(o=>{
     if(o.lat==null && state.site.lat!=null){
-      o.lat=state.site.lat; o.lon=state.site.lon; o.gpsFrom="site";
-      o.address=state.site.address;
+      o.lat=state.site.lat; o.lon=state.site.lon; o.gpsFrom="site"; o.address=state.site.address;
       attachWeather(o);
-    }else if(o.lat!=null && !o.wx){
-      attachWeather(o);
-    }
+    }else if(o.lat!=null && !o.wx){ attachWeather(o); }
   });
 }
 async function attachWeather(o){
@@ -717,24 +1105,20 @@ async function attachWeather(o){
 }
 
 /* ============================================================
-   Observations — each holds any number of photos
+   Observations
    ============================================================ */
 $("#btnCam").addEventListener("click",()=>$("#fileCam").click());
 $("#btnLib").addEventListener("click",()=>$("#fileLib").click());
 $("#btnNote").addEventListener("click",()=>{ const o=addObs({}); focusComment(o); });
-/* camera: one shot, one new observation */
 $("#fileCam").addEventListener("change",async e=>{
   const f=e.target.files[0]; e.target.value="";
   if(!f) return;
-  const o=addObs({});
-  await addPhotos(o,[f]);
+  const o=addObs({}); await addPhotos(o,[f]);
 });
-/* library: everything selected lands in ONE observation */
 $("#fileLib").addEventListener("change",async e=>{
   const files=[...e.target.files]; e.target.value="";
   if(!files.length) return;
-  const o=addObs({});
-  await addPhotos(o,files);
+  const o=addObs({}); await addPhotos(o,files);
   if(files.length>1) toast(files.length+" photos in observation "+pad(state.obs.indexOf(o)+1)+".");
 });
 
@@ -743,24 +1127,20 @@ async function addPhotos(o,files){
     try{
       const ex=await readExif(f);
       const bmp=await decode(f);
-      const p={ img:resample(bmp,1600,0.82), thumb:resample(bmp,760,0.78).url,
-                filename:f.name, taken:(ex&&ex.taken)||localStamp(new Date(f.lastModified||Date.now())),
-                lat:ex?ex.lat:null, lon:ex?ex.lon:null };
+      const p={img:resample(bmp,1600,0.82), thumb:resample(bmp,760,0.78).url, marks:[],
+               filename:f.name, taken:(ex&&ex.taken)||localStamp(new Date(f.lastModified||Date.now())),
+               lat:ex?ex.lat:null, lon:ex?ex.lon:null};
       if(bmp.close) bmp.close();
       o.photos.push(p);
-      /* the observation takes its time and position from the first photo that has them */
       if(o.photos.length===1 && p.taken) o.taken=p.taken;
       if(o.lat==null && p.lat!=null){
         o.lat=p.lat; o.lon=p.lon; o.alt=ex?ex.alt:null; o.gpsFrom="photo"; o.address="";
       }
-    }catch(err){
-      toast("Couldn't read "+f.name+". HEIC may need converting to JPEG.");
-    }
+    }catch(err){ toast("Couldn't read "+f.name+". HEIC may need converting to JPEG."); }
   }
   mountShots(o); paintData(o);
   await resolveLocation(o);
 }
-/* every observation ends up with coordinates if any route can supply them */
 async function resolveLocation(o){
   if(o.lat==null){
     if(state.site.lat!=null){
@@ -772,29 +1152,39 @@ async function resolveLocation(o){
         if(state.site.lat==null) setSite(p.lat,p.lon,"");
       }catch(e){}
     }
-  }else if(state.site.lat==null){
-    setSite(o.lat,o.lon,"");
-  }
-  attachWeather(o);
-  paintData(o);
+  }else if(state.site.lat==null){ setSite(o.lat,o.lon,""); }
+  attachWeather(o); paintData(o);
 }
 
 function addObs(extra){
   const o=Object.assign({
     id:"o"+(++seq), photos:[], taken:localStamp(new Date()),
     lat:null, lon:null, alt:null, gpsFrom:null, address:"", wx:null,
-    cat:"Observation", loc:"", comment:"", action:""
+    discipline:disciplines()[0], cat:"Observation", status:"New",
+    floor:"", room:"", area:"", comment:"", action:"", origin:""
   },extra||{});
   if(!Array.isArray(o.photos)) o.photos=[];
+  o.photos.forEach(p=>{ if(!Array.isArray(p.marks)) p.marks=[]; });
   state.obs.push(o);
   buildCard(o);
   renumber();
-  o._root.scrollIntoView({behavior:"smooth",block:"center"});
+  if(o._root.scrollIntoView) o._root.scrollIntoView({behavior:"smooth",block:"center"});
   return o;
 }
 function focusComment(o){
   const ta=o._root.querySelector('[data-f="comment"]');
-  if(ta) ta.focus();
+  if(ta&&ta.focus) ta.focus();
+}
+function optionsFor(list,sel){
+  return list.map(v=>{
+    const name=Array.isArray(v)?v[0]:v;
+    return '<option'+(name===sel?" selected":"")+">"+esc(name)+"</option>";
+  }).join("");
+}
+function refillDisc(o){
+  const s=o._els.disc, cur=o.discipline, list=disciplines();
+  s.innerHTML=optionsFor(list,cur);
+  if(!list.includes(cur)){ o.discipline=list[0]; s.value=list[0]; }
 }
 
 function buildCard(o){
@@ -804,12 +1194,17 @@ function buildCard(o){
     <div class="slip__hd">
       <span class="tag"></span>
       <span class="slip__num">00</span>
-      <select aria-label="Category">${CATS.map(c=>`<option${c[0]===o.cat?" selected":""}>${esc(c[0])}</option>`).join("")}</select>
+      <span class="origin"></span>
       <span class="icons">
         <button class="ibtn" type="button" data-a="up" title="Move up" aria-label="Move up">↑</button>
         <button class="ibtn" type="button" data-a="down" title="Move down" aria-label="Move down">↓</button>
         <button class="ibtn" type="button" data-a="del" title="Delete observation" aria-label="Delete observation">✕</button>
       </span>
+    </div>
+    <div class="trio">
+      <select data-s="discipline" aria-label="Discipline">${optionsFor(disciplines(),o.discipline)}</select>
+      <select data-s="cat" aria-label="Type">${optionsFor(TYPES,o.cat)}</select>
+      <select data-s="status" class="st" aria-label="Status">${optionsFor(STATUSES,o.status)}</select>
     </div>
     <div class="shots shots--empty"></div>
     <div class="shotbar">
@@ -817,8 +1212,13 @@ function buildCard(o){
       <span class="ct"></span>
     </div>
     <div class="field">
-      <label class="lbl">Location / area</label>
-      <input data-f="loc" placeholder="e.g. Level 2, grid C-4, north corridor">
+      <label class="lbl">Floor / room / area</label>
+      <div class="loc3">
+        <input data-f="floor" placeholder="Floor" aria-label="Floor">
+        <input data-f="room" placeholder="Room" aria-label="Room">
+        <input data-f="area" placeholder="Area / grid" aria-label="Area or grid">
+      </div>
+      <div class="chips"></div>
     </div>
     <div class="field ta">
       <label class="lbl">Observation</label>
@@ -834,35 +1234,43 @@ function buildCard(o){
   o._root=a;
   o._els={
     tag:a.querySelector(".tag"), num:a.querySelector(".slip__num"),
-    sel:a.querySelector("select"), data:a.querySelector(".slip__data"),
-    shots:a.querySelector(".shots"), ct:a.querySelector(".shotbar .ct")
+    origin:a.querySelector(".origin"), data:a.querySelector(".slip__data"),
+    shots:a.querySelector(".shots"), ct:a.querySelector(".shotbar .ct"),
+    chips:a.querySelector(".chips"),
+    disc:a.querySelector('[data-s="discipline"]')
   };
   cards.set(o.id,o);
 
   a.querySelectorAll("[data-f]").forEach(inp=>{
     inp.value=o[inp.dataset.f]||"";
     inp.addEventListener("input",()=>{ o[inp.dataset.f]=inp.value; });
+    if(["floor","room","area"].includes(inp.dataset.f))
+      inp.addEventListener("change",()=>rememberPlace(o));
   });
-  o._els.sel.addEventListener("change",()=>{ o.cat=o._els.sel.value; paintTag(o); });
-
+  a.querySelectorAll("[data-s]").forEach(sel=>{
+    sel.addEventListener("change",()=>{
+      o[sel.dataset.s]=sel.value;
+      paintTag(o); paintData(o);
+    });
+  });
   a.addEventListener("click",ev=>{
     const b=ev.target.closest("[data-a]");
-    if(!b || !a.contains(b)) return;
+    if(!b||!a.contains(b)) return;
     const act=b.dataset.a;
-    if(act==="del")       removeObs(o);
-    else if(act==="up")   move(o,-1);
-    else if(act==="down") move(o,1);
-    else if(act==="mic")  dictate(o,b);
-    else if(act==="add")  pickPhotos(o);
-    else if(act==="rmshot") removeShot(o, +b.dataset.i);
-    else if(act==="open")   lightbox(o, +b.dataset.i);
+    if(act==="del")          removeObs(o);
+    else if(act==="up")      move(o,-1);
+    else if(act==="down")    move(o,1);
+    else if(act==="mic")     dictate(o,b);
+    else if(act==="add")     pickPhotos(o);
+    else if(act==="rmshot")  removeShot(o,+b.dataset.i);
+    else if(act==="open")    lightbox(o,+b.dataset.i);
+    else if(act==="mark")    openMarkup(o,+b.dataset.i);
   });
 
   $("#obsList").appendChild(a);
-  mountShots(o); paintTag(o); paintData(o);
+  mountShots(o); paintTag(o); paintData(o); paintChips(o);
 }
 
-/* photo tiles, rebuilt whenever the set changes */
 function mountShots(o){
   const g=o._els.shots, n=o.photos.length;
   g.className="shots"+(n===0?" shots--empty":(n===1?" shots--one":""));
@@ -871,9 +1279,11 @@ function mountShots(o){
       <img alt="Site photograph ${i+1}" src="${p.thumb}" data-a="open" data-i="${i}">
       <button class="shot__x" type="button" data-a="rmshot" data-i="${i}"
         title="Remove this photo" aria-label="Remove photo ${i+1}">✕</button>
+      <button class="shot__mk" type="button" data-a="mark" data-i="${i}"
+        aria-label="Mark up photo ${i+1}">${(p.marks&&p.marks.length)?"Marked":"Mark"}</button>
       <span class="shot__n">${pad(i+1)}${p.taken?" · "+clockOnly(p.taken):""}</span>
     </div>`).join("");
-  o._els.ct.textContent = n===0 ? "no photos" : n===1 ? "1 photo" : n+" photos";
+  o._els.ct.textContent = n===0?"no photos":n===1?"1 photo":n+" photos";
 }
 function removeShot(o,i){
   const p=o.photos[i];
@@ -895,16 +1305,46 @@ function pickPhotos(o){
   });
   inp.click();
 }
-
-function paintTag(o){ o._els.tag.style.background=CATC[o.cat]||"#4A5157"; }
+function paintTag(o){ o._els.tag.style.background=STATC[o.status]||TYPEC[o.cat]||"#4A5157"; }
 function paintData(o){
   const bits=[];
   bits.push(`<span><b>TIME</b> ${esc(prettyTime(o.taken))}</span>`);
   if(o.photos.length) bits.push(`<span><b>PHOTOS</b> ${o.photos.length}</span>`);
+  const marked=o.photos.filter(p=>p.marks&&p.marks.length).length;
+  if(marked) bits.push(`<span><b>MARKED</b> ${marked}</span>`);
   if(o.lat!=null) bits.push(`<span><b>POS</b> ${esc(coordStr(o.lat,o.lon))}${o.gpsFrom?" ("+o.gpsFrom+")":""}</span>`);
   if(o.address) bits.push(`<span><b>PLACE</b> ${esc(o.address)}</span>`);
   if(o.wx) bits.push(`<span><b>WX</b> ${esc(wxText(o.wx))}</span>`);
   o._els.data.innerHTML=bits.join("");
+  o._els.origin.textContent = o.origin ? "from "+o.origin : "";
+}
+function rememberPlace(o){
+  const key=[o.floor,o.room,o.area].map(s=>(s||"").trim()).join("|");
+  if(key==="||") return;
+  const list=state.project.places||(state.project.places=[]);
+  const i=list.indexOf(key);
+  if(i>-1) list.splice(i,1);
+  list.unshift(key);
+  if(list.length>10) list.length=10;
+  persist();
+  state.obs.forEach(paintChips);
+}
+function paintChips(o){
+  const box=o._els.chips, list=state.project.places||[];
+  box.innerHTML="";
+  list.slice(0,5).forEach(key=>{
+    const [f,r,a]=key.split("|");
+    const b=document.createElement("button");
+    b.type="button";
+    b.textContent=[f,r,a].filter(Boolean).join(" · ")||"—";
+    b.addEventListener("click",()=>{
+      o.floor=f||""; o.room=r||""; o.area=a||"";
+      o._root.querySelector('[data-f="floor"]').value=o.floor;
+      o._root.querySelector('[data-f="room"]').value=o.room;
+      o._root.querySelector('[data-f="area"]').value=o.area;
+    });
+    box.appendChild(b);
+  });
 }
 
 function reflow(){ const l=$("#obsList"); state.obs.forEach(x=>l.appendChild(x._root)); }
@@ -935,35 +1375,498 @@ function renumber(){
   $("#empty").style.display=state.obs.length?"none":"";
 }
 
-/* full-screen viewer with paging across an observation's photos */
+/* ---------------- lightbox ---------------- */
 function lightbox(o,i){
   let k=i;
-  const d=document.createElement("div"); d.className="lightbox";
+  const d=document.createElement("div"); d.className="ov";
   const img=document.createElement("img");
-  const nav=document.createElement("div"); nav.className="lbnav";
-  const prev=document.createElement("button"); prev.className="btn btn--sm"; prev.textContent="‹ Prev";
-  const next=document.createElement("button"); next.className="btn btn--sm"; next.textContent="Next ›";
+  const bar=document.createElement("div"); bar.className="ovbar";
+  const prev=mkBtn("‹ Prev"), next=mkBtn("Next ›"), mark=mkBtn("Mark up"), close=mkBtn("Close");
   const ctr=document.createElement("span"); ctr.className="mono";
-  const close=document.createElement("button"); close.className="btn btn--sm"; close.textContent="Close";
-  function paint(){
+  function mkBtn(t){ const b=document.createElement("button"); b.className="btn btn--sm"; b.type="button"; b.textContent=t; return b; }
+  async function paint(){
     const p=o.photos[k];
     if(!p){ d.remove(); return; }
-    img.src=p.img?p.img.url:p.thumb;
+    const f=await flatten(p,1400).catch(()=>p.img);
+    img.src=(f&&f.url)||p.thumb;
     ctr.textContent=(k+1)+" / "+o.photos.length+(p.taken?"   "+clockOnly(p.taken):"");
   }
   prev.addEventListener("click",()=>{ k=(k-1+o.photos.length)%o.photos.length; paint(); });
   next.addEventListener("click",()=>{ k=(k+1)%o.photos.length; paint(); });
+  mark.addEventListener("click",()=>{ d.remove(); openMarkup(o,k); });
   close.addEventListener("click",()=>d.remove());
-  if(o.photos.length>1) nav.append(prev,ctr,next,close); else nav.append(ctr,close);
-  d.append(img,nav);
+  if(o.photos.length>1) bar.append(prev,ctr,next,mark,close); else bar.append(ctr,mark,close);
+  d.append(img,bar);
   d.addEventListener("click",e=>{ if(e.target===d) d.remove(); });
   document.body.appendChild(d);
   paint();
 }
 
 /* ============================================================
-   Dictation
+   Photo markup
    ============================================================ */
+async function openMarkup(o,idx){
+  const p=o.photos[idx];
+  if(!p||!p.img) return;
+  let img;
+  try{ img=await loadImg(p.img.url); }
+  catch(e){ toast("Couldn't open that photo for markup."); return; }
+
+  const marks=JSON.parse(JSON.stringify(p.marks||[]));
+  let tool="arrow", color=MARK_COLORS[0], drag=null;
+
+  const ov=document.createElement("div"); ov.className="ov";
+  const wrap=document.createElement("div"); wrap.className="mkwrap";
+  const cv=document.createElement("canvas");
+  wrap.appendChild(cv);
+
+  const maxW=Math.min(window.innerWidth-24,900);
+  const maxH=window.innerHeight*0.60;
+  const k=Math.min(maxW/p.img.w, maxH/p.img.h, 1);
+  cv.width=Math.round(p.img.w*k); cv.height=Math.round(p.img.h*k);
+  const g=cv.getContext("2d");
+
+  const tools=document.createElement("div"); tools.className="ovbar";
+  const textIn=document.createElement("input");
+  textIn.className="mktext"; textIn.placeholder="Callout text, then tap the photo";
+  const bar2=document.createElement("div"); bar2.className="ovbar";
+
+  function tbtn(label,name){
+    const b=document.createElement("button");
+    b.className="tool"; b.type="button"; b.textContent=label;
+    b.setAttribute("aria-pressed",String(tool===name));
+    b.addEventListener("click",()=>{
+      tool=name;
+      tools.querySelectorAll(".tool").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+      textIn.style.display = name==="text" ? "" : "none";
+    });
+    return b;
+  }
+  tools.append(tbtn("Arrow","arrow"),tbtn("Circle","ellipse"),tbtn("Box","rect"),tbtn("Text","text"));
+  MARK_COLORS.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="sw"; b.type="button"; b.style.background=c;
+    b.setAttribute("aria-label","Colour "+c);
+    b.setAttribute("aria-pressed",String(c===color));
+    b.addEventListener("click",()=>{
+      color=c;
+      tools.querySelectorAll(".sw").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+    });
+    tools.appendChild(b);
+  });
+  textIn.style.display="none";
+
+  const undo=document.createElement("button"); undo.className="tool"; undo.type="button"; undo.textContent="Undo";
+  const clear=document.createElement("button"); clear.className="tool"; clear.type="button"; clear.textContent="Clear all";
+  const cancel=document.createElement("button"); cancel.className="tool"; cancel.type="button"; cancel.textContent="Cancel";
+  const done=document.createElement("button"); done.className="btn btn--hv btn--sm"; done.type="button"; done.textContent="Done";
+  bar2.append(undo,clear,cancel,done);
+
+  function render(live){
+    g.clearRect(0,0,cv.width,cv.height);
+    g.drawImage(img,0,0,cv.width,cv.height);
+    drawMarks(g,live?marks.concat([live]):marks,cv.width,cv.height);
+  }
+  function pt(ev){
+    const r=cv.getBoundingClientRect();
+    const cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
+    const cy=(ev.touches?ev.touches[0].clientY:ev.clientY)-r.top;
+    return {x:Math.min(1,Math.max(0,cx/r.width)), y:Math.min(1,Math.max(0,cy/r.height))};
+  }
+  cv.addEventListener("pointerdown",ev=>{
+    ev.preventDefault();
+    const q=pt(ev);
+    if(tool==="text"){
+      const t=textIn.value.trim();
+      if(!t){ toast("Type the callout text first, then tap the photo."); return; }
+      marks.push({type:"text",x1:q.x,y1:q.y,text:t,color});
+      render();
+      return;
+    }
+    drag={type:tool,x1:q.x,y1:q.y,x2:q.x,y2:q.y,color};
+    cv.setPointerCapture&&cv.setPointerCapture(ev.pointerId);
+  });
+  cv.addEventListener("pointermove",ev=>{
+    if(!drag) return;
+    ev.preventDefault();
+    const q=pt(ev); drag.x2=q.x; drag.y2=q.y; render(drag);
+  });
+  cv.addEventListener("pointerup",ev=>{
+    if(!drag) return;
+    const q=pt(ev); drag.x2=q.x; drag.y2=q.y;
+    const far=Math.hypot((drag.x2-drag.x1)*cv.width,(drag.y2-drag.y1)*cv.height);
+    if(far>8) marks.push(drag);
+    drag=null; render();
+  });
+  cv.addEventListener("pointercancel",()=>{ drag=null; render(); });
+
+  undo.addEventListener("click",()=>{ marks.pop(); render(); });
+  clear.addEventListener("click",()=>{ marks.length=0; render(); });
+  cancel.addEventListener("click",()=>ov.remove());
+  done.addEventListener("click",async()=>{
+    p.marks=marks;
+    await refreshThumb(p);
+    mountShots(o); paintData(o);
+    ov.remove();
+    toast(marks.length?"Markup saved. It prints on the PDF.":"Markup cleared.");
+  });
+
+  ov.append(wrap,tools,textIn,bar2);
+  document.body.appendChild(ov);
+  render();
+}
+
+/* ============================================================
+   Carry-forward
+   ============================================================ */
+function paintCarry(){
+  const h=state.project.history||[];
+  const last=h[h.length-1];
+  const b=$("#btnCarry");
+  if(!last){ b.disabled=true; b.textContent="Carry forward (no filed reports yet)"; return; }
+  const open=(last.obs||[]).filter(x=>OPEN_STATES.includes(x.status)).length;
+  b.disabled=false;
+  b.textContent="Carry forward from RPT "+last.reportNo+" ("+open+" open)";
+}
+function openCarrySheet(items,label){
+  const ov=document.createElement("div"); ov.className="ov";
+  const sheet=document.createElement("div"); sheet.className="ovsheet";
+  const h=document.createElement("h3"); h.textContent="Carry forward from "+label;
+  sheet.appendChild(h);
+  if(!items.length){
+    const p=document.createElement("div");
+    p.style.padding="14px"; p.style.fontSize="13px"; p.className="dim";
+    p.textContent="No open items in that report — everything was closed.";
+    sheet.appendChild(p);
+  }
+  const boxes=[];
+  items.forEach(it=>{
+    const row=document.createElement("label"); row.className="cf";
+    const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=true;
+    boxes.push({cb,it});
+    row.appendChild(cb);
+    if(it.thumb){ const im=document.createElement("img"); im.src=it.thumb; im.alt=""; row.appendChild(im); }
+    const body=document.createElement("div"); body.className="cfb";
+    const m=document.createElement("div"); m.className="cfm";
+    m.textContent=[it.ref,it.discipline,it.status,placeStr(it)].filter(Boolean).join("  ·  ");
+    const t=document.createElement("div"); t.className="cft";
+    t.textContent=(it.comment||"").slice(0,220);
+    body.append(m,t); row.appendChild(body);
+    sheet.appendChild(row);
+  });
+  const foot=document.createElement("div"); foot.className="ovfoot";
+  const imp=document.createElement("button"); imp.className="btn btn--hv btn--sm"; imp.type="button";
+  imp.textContent="Import selected";
+  const none=document.createElement("button"); none.className="btn btn--sm btn--quiet"; none.type="button";
+  none.textContent="Cancel";
+  const keep=document.createElement("label");
+  keep.style.cssText="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);margin-left:auto";
+  const keepCb=document.createElement("input"); keepCb.type="checkbox"; keepCb.checked=true;
+  keepCb.style.cssText="width:18px;height:18px";
+  keep.append(keepCb,document.createTextNode("Keep reference photo"));
+  foot.append(imp,none,keep);
+  sheet.appendChild(foot);
+  imp.addEventListener("click",()=>{
+    let n=0;
+    boxes.forEach(({cb,it})=>{
+      if(!cb.checked) return;
+      const photos=[];
+      if(keepCb.checked && it.thumb)
+        photos.push({img:{url:it.thumb,w:it.tw||760,h:it.th||570}, thumb:it.thumb, marks:[],
+                     filename:"reference", taken:it.taken||"", lat:null, lon:null, ref:true});
+      addObs({discipline:it.discipline||disciplines()[0], cat:it.cat||"Observation",
+              status: it.status==="New" ? "Open" : (it.status||"Open"),
+              floor:it.floor||"", room:it.room||"", area:it.area||"",
+              comment:it.comment||"", action:it.action||"",
+              origin:it.ref||"", photos});
+      n++;
+    });
+    ov.remove();
+    renumber();
+    toast(n?(n+" item"+(n>1?"s":"")+" carried forward. Update each status as you re-inspect."):"Nothing selected.");
+  });
+  none.addEventListener("click",()=>ov.remove());
+  ov.addEventListener("click",e=>{ if(e.target===ov) ov.remove(); });
+  ov.appendChild(sheet);
+  document.body.appendChild(ov);
+}
+$("#btnCarry").addEventListener("click",()=>{
+  const h=state.project.history||[];
+  const last=h[h.length-1];
+  if(!last) return;
+  const items=(last.obs||[]).filter(x=>OPEN_STATES.includes(x.status));
+  openCarrySheet(items,"RPT "+last.reportNo+" ("+fmtDate(last.date)+")");
+});
+$("#btnCarryFile").addEventListener("click",()=>$("#fileCarry").click());
+$("#fileCarry").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value="";
+  if(!f) return;
+  try{
+    const d=JSON.parse(await f.text());
+    const rep=d.meta?d.meta.reportNo:"";
+    const items=(d.obs||[]).map((x,i)=>({
+      ref:"RPT "+(rep||"?")+" item "+pad(i+1),
+      discipline:x.discipline, cat:x.cat, status:x.status||"Open",
+      floor:x.floor||"", room:x.room||"", area:x.area||x.loc||"",
+      comment:x.comment||"", action:x.action||"", taken:x.taken||"",
+      thumb:(x.photos&&x.photos[0]&&x.photos[0].thumb)||x.thumb||""
+    })).filter(x=>OPEN_STATES.includes(x.status));
+    openCarrySheet(items,"the file you chose");
+  }catch(err){ toast("That file isn't a saved report."); }
+});
+
+/* ============================================================
+   Online archive — GitHub contents API
+   Two kinds of file per project:
+     index.json          light records for carry-forward (small, synced often)
+     Field Report NNN.json   the complete report, photos and markup included
+   ============================================================ */
+function b64enc(str){
+  const bytes=new TextEncoder().encode(str);
+  let out="", chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk)
+    out+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk));
+  return btoa(out);
+}
+function b64dec(b){
+  const bin=atob(String(b).replace(/\s/g,""));
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function ghCfg(){
+  const p=state.project;
+  return {owner:(p.ghOwner||"").trim(), repo:(p.ghRepo||"").trim(),
+    path:(p.ghPath||"reports").replace(/^\/+|\/+$/g,""),
+    branch:(p.ghBranch||"main").trim(), token:(p.ghToken||"").trim()};
+}
+function ghReady(){
+  const c=ghCfg();
+  if(!c.owner||!c.repo){ ghSay("Set the account and repository first."); return null; }
+  return c;
+}
+function projSlug(){
+  const p=state.project;
+  return (safeName(p.shortName||p.name||"project")||"project")
+    .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,48) || "project";
+}
+function ghDir(){ const c=ghCfg(); return c.path+"/"+projSlug(); }
+function ghSay(msg){ const el=$("#ghStatus"); if(el) el.textContent=msg; }
+function ghUrl(filePath,withRef){
+  const c=ghCfg();
+  const enc=filePath.split("/").map(encodeURIComponent).join("/");
+  return "https://api.github.com/repos/"+encodeURIComponent(c.owner)+"/"+
+    encodeURIComponent(c.repo)+"/contents/"+enc+(withRef?"?ref="+encodeURIComponent(c.branch):"");
+}
+async function ghReq(url,opts,raw){
+  const c=ghCfg();
+  const h={"Accept": raw?"application/vnd.github.raw":"application/vnd.github+json",
+           "X-GitHub-Api-Version":"2022-11-28"};
+  if(c.token) h.Authorization="Bearer "+c.token;
+  if(opts&&opts.body) h["Content-Type"]="application/json";
+  const r=await fetch(url,Object.assign({},opts,{headers:h}));
+  return r;
+}
+function ghErr(r){
+  if(r.status===401) return "Token rejected (401). Check it hasn't expired.";
+  if(r.status===403) return "Forbidden (403) — token lacks Contents write, or the rate limit is hit.";
+  if(r.status===404) return "Not found (404) — check owner, repo, branch. A private repo needs a token.";
+  if(r.status===409) return "Conflict (409) — the branch may be empty. Add any file to it once, in the web UI.";
+  if(r.status===422) return "Rejected (422) — usually a file too large for the API.";
+  return "GitHub returned "+r.status+".";
+}
+async function ghGet(filePath){
+  const r=await ghReq(ghUrl(filePath,true),{method:"GET"},true);
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error(ghErr(r));
+  return await r.text();
+}
+async function ghSha(filePath){
+  const r=await ghReq(ghUrl(filePath,true),{method:"GET"},false);
+  if(r.status===404) return null;
+  if(!r.ok) return null;
+  const d=await r.json();
+  return d&&d.sha||null;
+}
+async function ghPut(filePath,text,message){
+  const c=ghCfg();
+  if(!c.token) throw new Error("Writing needs an access token.");
+  const sha=await ghSha(filePath);
+  const body={message:message||("Field report update "+new Date().toISOString()),
+    content:b64enc(text), branch:c.branch};
+  if(sha) body.sha=sha;
+  const r=await ghReq(ghUrl(filePath,false),{method:"PUT",body:JSON.stringify(body)},false);
+  if(!r.ok) throw new Error(ghErr(r));
+  return await r.json();
+}
+async function ghList(){
+  const r=await ghReq(ghUrl(ghDir(),true),{method:"GET"},false);
+  if(r.status===404) return [];
+  if(!r.ok) throw new Error(ghErr(r));
+  const d=await r.json();
+  return Array.isArray(d)?d.filter(x=>x.type==="file"&&/\.json$/i.test(x.name)):[];
+}
+function indexPayload(){
+  const p=state.project;
+  return {kind:"field-report-index", version:3, updated:new Date().toISOString(),
+    project:{name:p.name,shortName:p.shortName,number:p.number,address:p.address},
+    nextReportNo:p.nextReportNo, reports:p.history||[]};
+}
+function mergeIndex(idx){
+  const p=state.project;
+  if(!idx||!Array.isArray(idx.reports)) return 0;
+  const byNo={};
+  (p.history||[]).forEach(h=>byNo[h.reportNo]=h);
+  let n=0;
+  idx.reports.forEach(r=>{
+    const cur=byNo[r.reportNo];
+    if(!cur || (r.savedAt||"")>(cur.savedAt||"")){ byNo[r.reportNo]=r; n++; }
+  });
+  p.history=Object.values(byNo).sort((a,b)=>
+    String(a.reportNo).localeCompare(String(b.reportNo),undefined,{numeric:true}));
+  if(p.history.length>40) p.history=p.history.slice(-40);
+  const top=p.history.reduce((m,h)=>Math.max(m,parseInt(h.reportNo,10)||0),0);
+  if(top+1>(p.nextReportNo||1)) p.nextReportNo=top+1;
+  if(idx.nextReportNo>(p.nextReportNo||1)) p.nextReportNo=idx.nextReportNo;
+  return n;
+}
+
+$("#btnGhTest").addEventListener("click",async()=>{
+  const c=ghReady(); if(!c) return;
+  ghSay("Checking "+c.owner+"/"+c.repo+" on "+c.branch+"…");
+  try{
+    const r=await ghReq("https://api.github.com/repos/"+encodeURIComponent(c.owner)+"/"+
+      encodeURIComponent(c.repo),{method:"GET"},false);
+    if(!r.ok) throw new Error(ghErr(r));
+    const d=await r.json();
+    const write = c.token ? "token present" : "no token — read only, and private repos won't open";
+    ghSay("Reached "+d.full_name+" ("+(d.private?"private":"PUBLIC — anyone can read it")+
+      "). Default branch "+d.default_branch+". "+write+". Files go to "+ghDir()+"/");
+  }catch(e){ ghSay(e.message); }
+});
+
+$("#btnGhPush").addEventListener("click",async()=>{
+  const c=ghReady(); if(!c) return;
+  const b=$("#btnGhPush"); b.disabled=true; b.textContent="Pushing…";
+  try{
+    const no=state.meta.reportNo||nextReportNumber();
+    const full=JSON.stringify(serialise());
+    const mb=(full.length/1048576);
+    ghSay("Uploading report "+no+" ("+mb.toFixed(1)+" MB) and the carry-forward index…");
+    await ghPut(ghDir()+"/index.json", JSON.stringify(indexPayload(),null,1),
+      "Carry-forward index — "+(state.project.name||projSlug()));
+    await ghPut(ghDir()+"/Field Report "+no+".json", full,
+      "Field report "+no+" — "+fmtDate(state.meta.date));
+    state.project.ghLast=new Date().toISOString();
+    writeNow();
+    ghSay("Pushed to "+ghDir()+"/ at "+new Date().toTimeString().slice(0,5)+
+      ". Index holds "+(state.project.history||[]).length+" filed report(s).");
+    toast("Report and index pushed to GitHub.");
+  }catch(e){ ghSay(e.message); toast(e.message,6000); }
+  finally{ b.disabled=false; b.textContent="Push this report"; }
+});
+
+$("#btnGhPull").addEventListener("click",async()=>{
+  const c=ghReady(); if(!c) return;
+  const b=$("#btnGhPull"); b.disabled=true; b.textContent="Pulling…";
+  try{
+    const txt=await ghGet(ghDir()+"/index.json");
+    if(!txt){
+      ghSay("No index.json in "+ghDir()+" yet. Push once from the device that has the history.");
+      return;
+    }
+    const n=mergeIndex(JSON.parse(txt));
+    writeNow(); paintCarry();
+    /* a fresh device starts at 001; adopt the archive's number once we know it */
+    if(state.obs.length===0) state.meta.reportNo=nextReportNumber();
+    syncVisitForm();
+    const h=state.project.history||[];
+    const last=h[h.length-1];
+    const open=last?(last.obs||[]).filter(x=>OPEN_STATES.includes(x.status)).length:0;
+    ghSay("Pulled "+h.length+" report(s); "+n+" new or newer. Latest is RPT "+
+      (last?last.reportNo:"—")+" with "+open+" open item(s). Next number "+nextReportNumber()+".");
+    toast(open?("Ready to carry forward "+open+" open item(s)."):"Index pulled.");
+  }catch(e){ ghSay(e.message); }
+  finally{ b.disabled=false; b.textContent="Pull open items"; }
+});
+
+$("#btnGhList").addEventListener("click",async()=>{
+  const c=ghReady(); if(!c) return;
+  const b=$("#btnGhList"); b.disabled=true; b.textContent="Loading…";
+  try{
+    const files=await ghList();
+    if(!files.length){ ghSay("Nothing in "+ghDir()+" yet."); return; }
+    openRemoteSheet(files);
+    ghSay(files.length+" file(s) in "+ghDir()+"/");
+  }catch(e){ ghSay(e.message); }
+  finally{ b.disabled=false; b.textContent="Browse archive"; }
+});
+
+function openRemoteSheet(files){
+  const ov=document.createElement("div"); ov.className="ov";
+  const sheet=document.createElement("div"); sheet.className="ovsheet";
+  const h=document.createElement("h3"); h.textContent="Archive — "+ghDir();
+  sheet.appendChild(h);
+  files.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
+  files.forEach(f=>{
+    const row=document.createElement("div"); row.className="cf";
+    const body=document.createElement("div"); body.className="cfb";
+    const m=document.createElement("div"); m.className="cfm";
+    m.textContent=(f.size/1024).toFixed(0)+" KB";
+    const t=document.createElement("div"); t.className="cft"; t.textContent=f.name;
+    body.append(t,m);
+    const take=document.createElement("button");
+    take.className="btn btn--xs"; take.type="button"; take.textContent="Open items";
+    const all=document.createElement("button");
+    all.className="btn btn--xs btn--quiet"; all.type="button"; all.textContent="Load whole report";
+    take.addEventListener("click",()=>pullFile(f,false,ov));
+    all.addEventListener("click",()=>pullFile(f,true,ov));
+    const acts=document.createElement("div");
+    acts.style.cssText="display:flex;flex-direction:column;gap:5px";
+    acts.append(take,all);
+    row.append(body,acts);
+    sheet.appendChild(row);
+  });
+  const foot=document.createElement("div"); foot.className="ovfoot";
+  const close=document.createElement("button");
+  close.className="btn btn--sm btn--quiet"; close.type="button"; close.textContent="Close";
+  close.addEventListener("click",()=>ov.remove());
+  foot.appendChild(close); sheet.appendChild(foot);
+  ov.addEventListener("click",e=>{ if(e.target===ov) ov.remove(); });
+  ov.appendChild(sheet); document.body.appendChild(ov);
+}
+async function pullFile(f,whole,ov){
+  ghSay("Fetching "+f.name+"…");
+  try{
+    const txt=await ghGet(ghDir()+"/"+f.name);
+    if(!txt) throw new Error("Couldn't read that file.");
+    const d=JSON.parse(txt);
+    if(d.kind==="field-report-index"){
+      const n=mergeIndex(d); writeNow(); paintCarry();
+      ghSay("Merged the index — "+n+" new or newer report(s).");
+      if(ov) ov.remove();
+      return;
+    }
+    if(whole){
+      loadReportObject(d);
+      if(ov) ov.remove();
+      ghSay("Loaded "+f.name+" as the current report.");
+      return;
+    }
+    const rep=d.meta?d.meta.reportNo:"";
+    const items=(d.obs||[]).map((x,i)=>({
+      ref:"RPT "+(rep||"?")+" item "+pad(i+1),
+      discipline:x.discipline, cat:x.cat, status:x.status||"Open",
+      floor:x.floor||"", room:x.room||"", area:x.area||x.loc||"",
+      comment:x.comment||"", action:x.action||"", taken:x.taken||"",
+      thumb:(x.photos&&x.photos[0]&&x.photos[0].thumb)||x.thumb||""
+    })).filter(x=>OPEN_STATES.includes(x.status));
+    if(ov) ov.remove();
+    openCarrySheet(items,f.name);
+  }catch(e){ ghSay(e.message); }
+}
+
+
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec=null, recBtn=null;
 function dictate(o,btn){
@@ -1001,76 +1904,119 @@ function stopRec(){
 }
 
 /* ============================================================
-   Save / open / reset
+   Save / open / file / reset
    ============================================================ */
 function download(blob,name){
   const u=URL.createObjectURL(blob), a=document.createElement("a");
   a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(u),4000);
 }
-function baseName(){
-  const p=[(state.meta.projectNo||state.meta.projectName||"FieldReport").replace(/[^\w-]+/g,"_")];
-  if(state.meta.reportNo) p.push("RPT"+state.meta.reportNo);
-  p.push(state.meta.date||todayISO());
-  return p.join("_");
+function projectForExport(){
+  /* the access token must never leave this device inside a file */
+  const c=Object.assign({},state.project);
+  delete c.ghToken;
+  return c;
+}
+function serialise(){
+  return {version:3, project:projectForExport(), meta:state.meta, site:state.site,
+    units:state.units, opts:state.opts,
+    obs:state.obs.map(o=>({taken:o.taken,lat:o.lat,lon:o.lon,alt:o.alt,gpsFrom:o.gpsFrom,
+      address:o.address,wx:o.wx,discipline:o.discipline,cat:o.cat,status:o.status,
+      floor:o.floor,room:o.room,area:o.area,comment:o.comment,action:o.action,origin:o.origin,
+      photos:o.photos}))};
+}
+function loadReportObject(d){
+  const keepToken=state.project.ghToken||"";
+  if(d.project&&d.project.id){
+    const inc=Object.assign(blankProject(""),d.project);
+    inc.ghToken = inc.ghToken || keepToken;
+    projects[inc.id]=inc;
+    state.project=projects[inc.id];
+  }else if(d.meta){
+    state.project.name=state.project.name||d.meta.projectName||"";
+    state.project.number=state.project.number||d.meta.projectNo||"";
+    state.project.firm=state.project.firm||d.meta.firm||"";
+    state.project.contractor=state.project.contractor||d.meta.contractor||"";
+    state.project.aor=state.project.aor||d.meta.author||"";
+  }
+  Object.assign(state.meta,{reportNo:"",date:todayISO(),arrive:"",depart:"",present:"",notes:"",wxNote:""},d.meta||{});
+  Object.assign(state.site,d.site||{});
+  if(d.units) state.units=d.units==="si"?"si":"us";
+  if(d.opts) Object.assign(state.opts,d.opts);
+  $("#uUS").setAttribute("aria-pressed",String(state.units==="us"));
+  $("#uSI").setAttribute("aria-pressed",String(state.units==="si"));
+  $("#obsList").innerHTML=""; cards.clear(); state.obs.length=0;
+  (d.obs||[]).forEach(x=>{
+    if(!x.photos) x.photos = x.thumb ? [{img:x.img,thumb:x.thumb,marks:[],filename:x.filename||"",
+                                         taken:x.taken,lat:x.lat,lon:x.lon}] : [];
+    if(x.loc&&!x.area) x.area=x.loc;
+    addObs(x);
+  });
+  syncProjectForm(); syncVisitForm(); syncOpts(); paintCarry();
+  if(state.site.lat!=null){ loadSiteWeather(); backfillLocation(); }
+  writeNow();
 }
 $("#btnSave").addEventListener("click",()=>{
-  const data={version:2,meta:state.meta,site:state.site,units:state.units,
-    obs:state.obs.map(o=>({taken:o.taken,lat:o.lat,lon:o.lon,alt:o.alt,gpsFrom:o.gpsFrom,
-      address:o.address,wx:o.wx,cat:o.cat,loc:o.loc,comment:o.comment,action:o.action,
-      photos:o.photos}))};
-  download(new Blob([JSON.stringify(data)],{type:"application/json"}),baseName()+".fieldreport.json");
-  toast("Report file saved to your device.");
+  download(new Blob([JSON.stringify(serialise())],{type:"application/json"}),
+    reportFileBase()+".fieldreport.json");
+  toast("Full report file saved, photos and markup included.");
 });
 $("#btnOpen").addEventListener("click",()=>$("#fileJson").click());
 $("#fileJson").addEventListener("change",async e=>{
   const f=e.target.files[0]; e.target.value="";
   if(!f) return;
-  try{
-    const d=JSON.parse(await f.text());
-    Object.assign(state.meta,d.meta||{});
-    Object.assign(state.site,d.site||{});
-    if(d.units){
-      state.units=d.units==="si"?"si":"us";
-      $("#uUS").setAttribute("aria-pressed",String(state.units==="us"));
-      $("#uSI").setAttribute("aria-pressed",String(state.units==="si"));
-    }
-    $("#obsList").innerHTML=""; cards.clear(); state.obs.length=0;
-    (d.obs||[]).forEach(x=>{
-      /* v1 files stored a single img/thumb per observation */
-      if(!x.photos){
-        x.photos = x.thumb ? [{img:x.img,thumb:x.thumb,filename:x.filename||"",taken:x.taken,
-                               lat:x.lat,lon:x.lon}] : [];
-      }
-      addObs(x);
-    });
-    syncMetaForm();
-    if(state.site.lat!=null){ loadSiteWeather(); backfillLocation(); }
-    toast("Report loaded.");
-  }catch(err){ toast("That file isn't a saved report."); }
+  try{ loadReportObject(JSON.parse(await f.text())); toast("Report loaded."); }
+  catch(err){ toast("That file isn't a saved report."); }
 });
+
+/* file the report: archive a light copy, bump the number */
+$("#btnFinish").addEventListener("click",()=>{
+  if(!state.obs.length){ toast("Nothing to file yet."); return; }
+  const p=state.project;
+  const no=state.meta.reportNo||nextReportNumber();
+  const rec={reportNo:no, date:state.meta.date||todayISO(), savedAt:new Date().toISOString(),
+    obs:state.obs.map((o,i)=>({
+      ref:"RPT "+no+" item "+pad(i+1),
+      discipline:o.discipline, cat:o.cat, status:o.status,
+      floor:o.floor, room:o.room, area:o.area,
+      comment:o.comment, action:o.action, taken:o.taken,
+      thumb:(o.photos[0]&&o.photos[0].thumb)||"", tw:760, th:570
+    }))};
+  p.history=(p.history||[]).filter(h=>h.reportNo!==no);
+  p.history.push(rec);
+  if(p.history.length>24) p.history.shift();
+  const n=parseInt(no,10);
+  if(isFinite(n)) p.nextReportNo=n+1;
+  writeNow();
+  paintCarry();
+  const open=rec.obs.filter(x=>OPEN_STATES.includes(x.status)).length;
+  toast("Filed RPT "+no+". "+open+" open item"+(open===1?"":"s")+" ready to carry into RPT "+nextReportNumber()+".",6000);
+});
+
 let clearArmed=false, clearTimer=null;
 function disarmClear(){
   clearArmed=false; clearTimeout(clearTimer);
-  const b=$("#btnClear"); b.textContent="Start new report"; b.classList.remove("btn--warn");
+  const b=$("#btnClear"); b.textContent="Start next report"; b.classList.remove("btn--warn");
 }
 $("#btnClear").addEventListener("click",()=>{
   const b=$("#btnClear");
-  if(!clearArmed && (state.obs.length||state.meta.projectName)){
+  if(!clearArmed && state.obs.length){
     clearArmed=true; b.textContent="Tap again to clear"; b.classList.add("btn--warn");
     clearTimer=setTimeout(disarmClear,4000);
     return;
   }
-  disarmClear();
+  disarmClear(); resetVisit(true);
+});
+function resetVisit(announce){
   $("#obsList").innerHTML=""; cards.clear(); state.obs.length=0;
-  Object.keys(state.meta).forEach(k=>state.meta[k]="");
-  state.meta.date=todayISO();
+  state.meta={reportNo:nextReportNumber(),date:todayISO(),arrive:"",depart:"",present:"",notes:"",wxNote:""};
   state.site={lat:null,lon:null,address:""}; state.wxNow=null; wxCache.clear();
   $("#wxTemp").textContent="—"; $("#wxDesc").textContent="No site location yet";
-  $("#wxMeta").textContent="Set the site location and the weather fills in automatically.";
+  $("#wxMeta").textContent="Set the site location once and the weather fills in automatically.";
   $("#latIn").value=""; $("#lonIn").value=""; showLocNote("");
-  syncMetaForm(); renumber();
-});
+  syncVisitForm(); renumber(); paintCarry();
+  if(announce) toast("Ready for RPT "+state.meta.reportNo+". Project details carried over.");
+}
 
 /* ============================================================
    PDF export
@@ -1079,36 +2025,67 @@ const HEX=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.sli
 
 $("#btnPdf").addEventListener("click",async()=>{
   const lib=window.jspdf&&window.jspdf.jsPDF;
-  if(!lib){
-    toast("PDF library didn't load — connect to the internet once, or use Print → Save as PDF.",6000);
-    return;
-  }
+  if(!lib){ toast("PDF library didn't load — connect once, or use Print → Save as PDF.",6000); return; }
   const b=$("#btnPdf"); b.disabled=true; b.textContent="Building…";
   try{ await buildPdf(lib); }
   catch(e){ console.error(e); toast("PDF export failed: "+e.message,5000); }
   finally{ b.disabled=false; b.textContent="Export PDF"; }
 });
 
+function orderedObs(){
+  const list=state.obs.map((o,i)=>({o,n:i+1}));
+  const D=disciplines();
+  if(state.opts.openFirst){
+    list.sort((a,b)=>{
+      const ao=OPEN_STATES.includes(a.o.status)?0:1, bo=OPEN_STATES.includes(b.o.status)?0:1;
+      return ao-bo || a.n-b.n;
+    });
+  }
+  if(state.opts.group){
+    list.sort((a,b)=>{
+      const ai=D.indexOf(a.o.discipline), bi=D.indexOf(b.o.discipline);
+      return (ai<0?99:ai)-(bi<0?99:bi) || a.n-b.n;
+    });
+  }
+  return list;
+}
+
 async function buildPdf(JsPDF){
   const doc=new JsPDF({unit:"mm",format:"letter",compress:true});
   const PW=doc.internal.pageSize.getWidth(), PH=doc.internal.pageSize.getHeight();
-  const M=14, CW=PW-M*2, HEAD_Y=20, FOOT_Y=PH-12;
-  let y=HEAD_Y;
+  const M=14, CW=PW-M*2, HEAD_Y=22, FOOT_Y=PH-13;
   const ink=HEX("#15181B"), gray=HEX("#818A90"), rule=HEX("#C3CAC6"), hv=HEX("#C7D92C");
+  const P=state.project;
+  let y=HEAD_Y;
+
+  /* pre-flatten every photo once, so markup prints and page maths is stable */
+  const flats=new Map();
+  for(const o of state.obs){
+    for(const p of o.photos){
+      try{ flats.set(p, await flatten(p, 1600)); }
+      catch(e){ flats.set(p, p.img); }
+    }
+  }
 
   function header(){
-    doc.setDrawColor(...ink); doc.setLineWidth(0.8); doc.line(M,13,PW-M,13);
-    doc.setFillColor(...hv); doc.rect(M,13.4,26,1.4,"F");
+    let tx=M;
+    if(P.logo&&P.logo.url){
+      const lh=8.5, lw=Math.min(46, lh*(P.logo.w/P.logo.h));
+      try{ doc.addImage(P.logo.url,"JPEG",M,4.5,lw,lh,undefined,"FAST"); tx=M+lw+4; }catch(e){}
+    }
     doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...ink);
-    doc.text("FIELD REPORT",M,11);
+    doc.text("FIELD REPORT",tx,11);
+    doc.setDrawColor(...ink); doc.setLineWidth(0.8); doc.line(M,15,PW-M,15);
+    doc.setFillColor(...hv); doc.rect(M,15.4,26,1.4,"F");
     doc.setFont("helvetica","normal"); doc.setTextColor(...gray);
-    doc.text([state.meta.projectName||"Untitled project","Rpt "+(state.meta.reportNo||"—"),
-      state.meta.date||""].filter(Boolean).join("   ·   "),PW-M,11,{align:"right"});
+    doc.text([P.name||"Untitled project","Rpt "+(state.meta.reportNo||"—"),
+      fmtDate(state.meta.date)].filter(Boolean).join("   ·   "),PW-M,11,{align:"right"});
   }
   function footer(){
     doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.line(M,FOOT_Y-4,PW-M,FOOT_Y-4);
     doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(...gray);
-    doc.text((state.meta.firm||"")+(state.meta.projectNo?"   ·   Project "+state.meta.projectNo:""),M,FOOT_Y);
+    const left=P.footer||[P.firm,P.number?"Project "+P.number:""].filter(Boolean).join("   ·   ");
+    doc.text(left,M,FOOT_Y);
     doc.text("Page "+doc.getCurrentPageInfo().pageNumber,PW-M,FOOT_Y,{align:"right"});
   }
   function newPage(){ footer(); doc.addPage(); header(); y=HEAD_Y; }
@@ -1121,129 +2098,173 @@ async function buildPdf(JsPDF){
   header();
 
   doc.setFont("helvetica","bold"); doc.setFontSize(19); doc.setTextColor(...ink);
-  doc.text(state.meta.projectName||"Untitled project",M,y+4); y+=8;
+  doc.text(P.name||"Untitled project",M,y+4); y+=8;
   doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(...gray);
-  doc.text("Construction administration field report"+(state.meta.reportNo?"  ·  No. "+state.meta.reportNo:""),M,y+1);
+  doc.text(["Construction administration field report",
+    state.meta.reportNo?"No. "+state.meta.reportNo:"", P.address||""]
+    .filter(Boolean).join("  ·  "),M,y+1);
   y+=7;
 
   const rows=[
-    [["Date of visit",state.meta.date],["Time on site",[state.meta.arrive,state.meta.depart].filter(Boolean).join(" – ")]],
-    [["Observed by",state.meta.author],["Firm",state.meta.firm]],
-    [["Contractor",state.meta.contractor],["Project no.",state.meta.projectNo]],
-    [["Site",[state.site.address,coordStr(state.site.lat,state.site.lon)].filter(x=>x&&x!=="—").join("  ·  ")],
-     ["Weather",state.meta.wxNote||wxText(state.wxNow)]]
+    [["Date of visit",fmtDate(state.meta.date)],
+     ["Time on site",[state.meta.arrive,state.meta.depart].filter(Boolean).join(" – ")]],
+    [["Observed by",P.aor],["Architect",P.firm]],
+    [["Contractor",P.contractor],["Project no.",P.number]],
+    [["Owner",P.owner],["Weather",state.meta.wxNote||wxText(state.wxNow)]],
+    [["Site",[state.site.address,coordStr(state.site.lat,state.site.lon)]
+      .filter(x=>x&&x!=="—").join("  ·  ")],
+     ["Distribution",(P.distribution||"").split(/\n+/).filter(Boolean).join("; ")]]
   ];
   doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.line(M,y,PW-M,y); y+=5;
   rows.forEach(r=>{
     let hmax=0;
     r.forEach((c,i)=>{
+      if(!c[1]) return;
       const x=M+i*(CW/2), w=CW/2-6;
       label(c[0],x,y); hmax=Math.max(hmax,value(c[1],x,y+4.2,w));
     });
-    y+=hmax+5.5;
+    if(hmax) y+=hmax+5.5;
   });
   if(state.meta.present){ need(16); label("Present on site",M,y); y+=4.2; y+=value(state.meta.present,M,y,CW)+5; }
   if(state.meta.notes){ need(22); label("General notes",M,y); y+=4.2; y+=value(state.meta.notes,M,y,CW)+4; }
   doc.setDrawColor(...rule); doc.line(M,y,PW-M,y); y+=8;
 
-  if(state.obs.length){
+  const list=orderedObs();
+  const openN=list.filter(x=>OPEN_STATES.includes(x.o.status)).length;
+  if(list.length){
     doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...ink);
-    doc.text("OBSERVATIONS  ("+state.obs.length+")",M,y); y+=6;
+    doc.text("OBSERVATIONS  ("+list.length+" total, "+openN+" open)",M,y); y+=6;
   }
 
-  /* tile several photos in rows of up to three; the grid is capped
-     at 150 mm so a photo-heavy observation still leaves room for text */
   function tileGeom(n){
-    const perRow=Math.min(3,n), gap=4, rows=Math.ceil(n/perRow);
+    const perRow=Math.min(state.opts.perRow||3,n), gap=4, rowsN=Math.ceil(n/perRow);
     const tileW=(CW-gap*(perRow-1))/perRow;
-    let tileH=Math.min(62,tileW*0.75);
-    if(rows*(tileH+7)>150) tileH=Math.max(24,150/rows-7);
-    return {perRow,gap,tileW,tileH,rows,h:rows*(tileH+7)};
+    let tileH=Math.min(64,tileW*0.75);
+    if(rowsN*(tileH+7)>150) tileH=Math.max(24,150/rowsN-7);
+    return {perRow,gap,tileW,tileH,rows:rowsN,h:rowsN*(tileH+7)};
   }
-  function drawTiles(o,idx,x,y0){
+  function drawTiles(o,num,x,y0){
     const n=o.photos.length, G=tileGeom(n);
     let yy=y0, k=0;
     while(k<n){
       for(let ri=0; ri<G.perRow && k+ri<n; ri++){
-        const p=o.photos[k+ri], bx=x+ri*(G.tileW+G.gap);
-        if(p.img&&p.img.url&&p.img.w&&p.img.h){
-          const ar=p.img.w/p.img.h;
+        const p=o.photos[k+ri], f=flats.get(p)||p.img, bx=x+ri*(G.tileW+G.gap);
+        if(f&&f.url&&f.w&&f.h){
+          const ar=f.w/f.h;
           let w=G.tileW, h=w/ar;
           if(h>G.tileH){ h=G.tileH; w=h*ar; }
           const ox=bx+(G.tileW-w)/2, oy=yy+(G.tileH-h)/2;
-          try{ doc.addImage(p.img.url,"JPEG",ox,oy,w,h,undefined,"FAST"); }catch(e){}
+          try{ doc.addImage(f.url,"JPEG",ox,oy,w,h,undefined,"FAST"); }catch(e){}
           doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.rect(ox,oy,w,h);
         }
         doc.setFont("helvetica","normal"); doc.setFontSize(6.4); doc.setTextColor(...gray);
-        doc.text(pad(idx+1)+"."+(k+ri+1)+(p.taken?"   "+clockOnly(p.taken):""),bx,yy+G.tileH+3.4);
+        const capt=pad(num)+"."+(k+ri+1)+(p.ref?"  reference":(p.taken?"   "+clockOnly(p.taken):""));
+        doc.text(capt,bx,yy+G.tileH+3.4);
       }
       yy+=G.tileH+7; k+=G.perRow;
     }
     return yy-y0;
   }
+  function statusBar(o,num,yy,cont){
+    doc.setFillColor(...HEX(STATC[o.status]||"#4A5157"));
+    doc.rect(M,yy,CW,4.6,"F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(7.6); doc.setTextColor(255,255,255);
+    const left=[pad(num),(o.discipline||"").toUpperCase(),(o.cat||"").toUpperCase(),
+      (o.status||"").toUpperCase()+(cont?" (CONT.)":"")].filter(Boolean).join("   ·   ");
+    doc.text(left,M+2.5,yy+3.3);
+    const pl=placeStr(o);
+    if(pl) doc.text(pl.slice(0,44).toUpperCase(),PW-M-2.5,yy+3.3,{align:"right"});
+  }
 
-  for(let i=0;i<state.obs.length;i++){
-    const o=state.obs[i];
-    const n=o.photos.length;
-    const single = n===1 && o.photos[0].img;
+  let lastDisc=null;
+  for(let i=0;i<list.length;i++){
+    const {o,n:num}=list[i];
+
+    const nPh=o.photos.length;
+    const single = nPh===1 && (flats.get(o.photos[0])||o.photos[0].img);
     const IW = single?74:0;
     let ih=0;
-    if(single){
-      const ar=o.photos[0].img.w/o.photos[0].img.h;
-      ih=Math.min(88, IW/ar);
-    }
-    const tilesH = (n>1) ? tileGeom(n).h : 0;
+    if(single){ const f=flats.get(o.photos[0])||o.photos[0].img; ih=Math.min(88, IW/(f.w/f.h)); }
+    const tilesH = nPh>1 ? tileGeom(nPh).h : 0;
     const tx=M+(single?IW+7:0), tw=CW-(single?IW+7:0);
 
     doc.setFontSize(10);
     const cLines=doc.splitTextToSize(o.comment||"—",tw);
-    const lLines=o.loc?doc.splitTextToSize(o.loc,tw):[];
     const aLines=o.action?doc.splitTextToSize(o.action,tw):[];
     const meta=[["Time",prettyTime(o.taken)],
+                ["Location",placeStr(o)||"—"],
                 ["Position",coordStr(o.lat,o.lon)+(o.address?"  ·  "+o.address:"")],
                 ["Weather",wxText(o.wx)||"—"]];
-    const th = 7 + (lLines.length?lLines.length*4.3+3:0) + cLines.length*4.3 + 3
-             + (aLines.length?aLines.length*4+5:0) + meta.length*3.6 + 3;
-    need(tilesH + Math.max(ih,th) + 11);
+    if(o.origin) meta.unshift(["First noted",o.origin]);
+    const textH = 7 + cLines.length*4.3 + 3 + (aLines.length?aLines.length*4+5:0)
+                + meta.length*3.6 + 3;
+    const blockH = 8 + (tilesH ? tilesH+textH : Math.max(ih,textH)) + 7;
+
+    /* a discipline heading must never sit alone at the foot of a page,
+       so it is measured together with the observation that follows it */
+    const wantHead = state.opts.group && o.discipline!==lastDisc;
+    const headH = wantHead ? 11 : 0;
+    const usable = (FOOT_Y-8) - HEAD_Y;
+
+    if(state.opts.onePer && y>HEAD_Y+1) newPage();
+    else if(y+headH+blockH>FOOT_Y-8 && headH+blockH<=usable) newPage();
+    else need(Math.min(headH+blockH, usable-1));
+
+    if(wantHead){
+      lastDisc=o.discipline;
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.4); doc.setTextColor(...ink);
+      doc.text((o.discipline||"General").toUpperCase(),M,y+3);
+      doc.setDrawColor(...ink); doc.setLineWidth(0.4); doc.line(M,y+5.5,PW-M,y+5.5);
+      y+=11;
+    }
 
     const y0=y;
-    doc.setFillColor(...HEX(CATC[o.cat]||"#4A5157"));
-    doc.rect(M,y0,CW,4.6,"F");
-    doc.setFont("helvetica","bold"); doc.setFontSize(7.6); doc.setTextColor(255,255,255);
-    doc.text(pad(i+1)+"   "+o.cat.toUpperCase()+(n>1?"   ("+n+" photos)":""),M+2.5,y0+3.3);
-    if(o.loc) doc.text(String(o.loc).slice(0,52).toUpperCase(),PW-M-2.5,y0+3.3,{align:"right"});
+    statusBar(o,num,y0,false);
     y=y0+8;
 
-    if(n>1){ y += drawTiles(o,i,M,y) + 1; }
+    if(nPh>1){ y += drawTiles(o,num,M,y)+1; }
     else if(single){
-      try{ doc.addImage(o.photos[0].img.url,"JPEG",M,y,IW,ih,undefined,"FAST"); }catch(e){}
+      const f=flats.get(o.photos[0])||o.photos[0].img;
+      try{ doc.addImage(f.url,"JPEG",M,y,IW,ih,undefined,"FAST"); }catch(e){}
       doc.setDrawColor(...rule); doc.setLineWidth(0.2); doc.rect(M,y,IW,ih);
+      if(o.photos[0].ref){
+        doc.setFont("helvetica","normal");doc.setFontSize(6.4);doc.setTextColor(...gray);
+        doc.text(pad(num)+".1  reference",M,y+ih+3.4);
+      }
     }
 
     const textTop=y;
     let ty=textTop;
-    if(lLines.length){
-      label("Location",tx,ty); ty+=4;
-      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(...ink);
-      doc.text(lLines,tx,ty); ty+=lLines.length*4.3+2.5;
+    /* draws text with page breaks, repeating the status bar when it continues */
+    function lines(arr,size,style,col,lead){
+      doc.setFont("helvetica",style); doc.setFontSize(size); doc.setTextColor(...col);
+      for(const ln of arr){
+        if(ty>FOOT_Y-12){
+          newPage(); statusBar(o,num,y,true); ty=y+9;
+          doc.setFont("helvetica",style); doc.setFontSize(size); doc.setTextColor(...col);
+        }
+        doc.text(ln,tx,ty); ty+=lead;
+      }
     }
     label("Observation",tx,ty); ty+=4;
-    doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(...ink);
-    doc.text(cLines,tx,ty); ty+=cLines.length*4.3+3;
+    lines(cLines,10,"normal",ink,4.3); ty+=3;
     if(aLines.length){
       label("Action required",tx,ty); ty+=4;
-      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(...HEX("#BF3126"));
-      doc.text(aLines,tx,ty); ty+=aLines.length*4+3;
+      lines(aLines,9.5,"bold",HEX("#BF3126"),4); ty+=3;
     }
     doc.setFont("helvetica","normal");doc.setFontSize(7.2);doc.setTextColor(...gray);
-    meta.forEach(m=>{ doc.text(m[0].toUpperCase()+"  "+m[1],tx,ty); ty+=3.6; });
+    meta.forEach(m=>{
+      if(ty>FOOT_Y-12){ newPage(); statusBar(o,num,y,true); ty=y+9;
+        doc.setFont("helvetica","normal");doc.setFontSize(7.2);doc.setTextColor(...gray); }
+      doc.text(m[0].toUpperCase()+"  "+m[1],tx,ty); ty+=3.6;
+    });
 
-    y = single ? textTop + Math.max(ih+2, ty-textTop) + 7 : ty + 7;
+    y = single ? Math.max(textTop+ih+2, ty) + 7 : ty + 7;
     doc.setDrawColor(...rule); doc.setLineWidth(0.2);
     doc.setLineDashPattern([1,1],0); doc.line(M,y-4,PW-M,y-4); doc.setLineDashPattern([],0);
   }
 
-  need(30); y+=4;
+  need(34); y+=4;
   doc.setFont("helvetica","normal"); doc.setFontSize(7.6); doc.setTextColor(...gray);
   const disc="This report covers observations made during a periodic site visit and does not constitute "+
     "a continuous or exhaustive inspection of the work, nor approval of work not in conformance with the contract documents.";
@@ -1252,20 +2273,44 @@ async function buildPdf(JsPDF){
   doc.line(M,y+8,M+70,y+8); label("Signature",M,y+12);
   doc.line(M+80,y+8,M+150,y+8);
   doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...ink);
-  doc.text((state.meta.author||"")+(state.meta.date?"   ·   "+state.meta.date:""),M+80,y+6);
+  doc.text([P.aor||"",fmtDate(state.meta.date)].filter(Boolean).join("   ·   "),M+80,y+6);
   label("Name and date",M+80,y+12);
+  if(P.firmContact){
+    doc.setFontSize(7.2); doc.setTextColor(...gray);
+    doc.text(P.firmContact,M,y+20);
+  }
 
   footer();
-  doc.save(baseName()+".pdf");
-  toast("PDF exported.");
+  doc.save(reportFileBase()+".pdf");
+  toast("Exported "+reportFileBase()+".pdf");
 }
 
-/* ---------------- startup ---------------- */
+/* ============================================================
+   Startup
+   ============================================================ */
 window.addEventListener("beforeunload",e=>{
   if(state.obs.length){ e.preventDefault(); e.returnValue=""; }
 });
 (function boot(){
-  renumber();
+  bindProjectFields();
+  const saved=store.load();
+  if(saved&&saved.projects&&Object.keys(saved.projects).length){
+    projects=saved.projects;
+    Object.keys(projects).forEach(id=>{ projects[id]=Object.assign(blankProject(""),projects[id]); projects[id].id=id; });
+    state.project = projects[saved.current] || projects[Object.keys(projects)[0]];
+    if(saved.opts) Object.assign(state.opts,saved.opts);
+    if(saved.units) state.units=saved.units;
+  }else{
+    projects[state.project.id]=state.project;
+  }
+  $("#uUS").setAttribute("aria-pressed",String(state.units==="us"));
+  $("#uSI").setAttribute("aria-pressed",String(state.units==="si"));
+  state.meta.reportNo=nextReportNumber();
+  syncProjectForm(); syncVisitForm(); syncOpts(); paintCarry(); renumber();
+  if(!store.ok){
+    showLocNote("<b>This browser isn't saving settings.</b> Storage is blocked here — likely a preview frame "+
+      "or private browsing. Project details won't persist until you open the page normally.");
+  }
   const blocked=locBlocker();
   if(blocked) showLocNote("<b>Heads up.</b> "+esc(blocked)+
     " Address search and typed coordinates still work, and weather follows from either.");
