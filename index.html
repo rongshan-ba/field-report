@@ -598,6 +598,15 @@ function bindProjectFields(){
   document.querySelectorAll("[data-p]").forEach(inp=>{
     inp.addEventListener("input",()=>{
       const k=inp.dataset.p;
+      if(k==="ghToken"){
+        const c=cleanToken(inp.value);
+        if(c!==inp.value) inp.value=c;
+        state.project.ghToken=c;
+        const bad=tokenProblem(c);
+        ghSay(bad || (c?("Token stored on this device: "+maskToken(c)+". Now tap Test connection."):""));
+        persist();
+        return;
+      }
       state.project[k] = (k==="nextReportNo"||k==="digits") ? (parseInt(inp.value,10)||1) : inp.value;
       if(k==="name"||k==="number") paintTopbar();
       paintFilename();
@@ -1653,11 +1662,42 @@ function b64dec(b){
   for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
   return new TextDecoder().decode(bytes);
 }
+/* Copy-paste often smuggles in characters an HTTP header cannot carry:
+   non-breaking spaces, zero-width joiners, smart quotes. Strip what is
+   safely strippable, then refuse clearly rather than throwing a raw
+   "non ISO-8859-1 code point" error from fetch. */
+function cleanToken(t){
+  return String(t||"")
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g,"")
+    .replace(/[\u00A0\u2007\u202F\u3000]/g,"")
+    .replace(/^\s*bearer\s+/i,"")
+    .replace(/[\u2018\u2019\u201C\u201D"'`]/g,"")
+    .replace(/\s+/g,"")
+    .trim();
+}
+function tokenProblem(t){
+  if(!t) return null;
+  const bad=[];
+  for(const ch of t){
+    const c=ch.codePointAt(0);
+    if(c<0x21||c>0x7E) bad.push("U+"+c.toString(16).toUpperCase().padStart(4,"0"));
+  }
+  if(bad.length) return "The access token contains "+bad.length+
+    " character(s) that can't go in a request header ("+[...new Set(bad)].slice(0,4).join(", ")+
+    "). That usually means it was copied from formatted text. Copy it again as plain text, "+
+    "or retype it, then Test connection.";
+  return null;
+}
+function maskToken(t){
+  if(!t) return "none";
+  return t.length<=14 ? (t.length+" characters") :
+    t.slice(0,11)+"\u2026"+t.slice(-4)+" ("+t.length+" characters)";
+}
 function ghCfg(){
   const p=state.project;
   return {owner:(p.ghOwner||"").trim(), repo:(p.ghRepo||"").trim(),
     path:(p.ghPath||"reports").replace(/^\/+|\/+$/g,""),
-    branch:(p.ghBranch||"main").trim(), token:(p.ghToken||"").trim()};
+    branch:(p.ghBranch||"main").trim(), token:cleanToken(p.ghToken)};
 }
 function ghReady(){
   const c=ghCfg();
@@ -1679,6 +1719,8 @@ function ghUrl(filePath,withRef){
 }
 async function ghReq(url,opts,raw){
   const c=ghCfg();
+  const bad=tokenProblem(c.token);
+  if(bad) throw new Error(bad);
   const h={"Accept": raw?"application/vnd.github.raw":"application/vnd.github+json",
            "X-GitHub-Api-Version":"2022-11-28"};
   if(c.token) h.Authorization="Bearer "+c.token;
@@ -1758,7 +1800,8 @@ $("#btnGhTest").addEventListener("click",async()=>{
       encodeURIComponent(c.repo),{method:"GET"},false);
     if(!r.ok) throw new Error(ghErr(r));
     const d=await r.json();
-    const write = c.token ? "token present" : "no token — read only, and private repos won't open";
+    const write = c.token ? ("token "+maskToken(c.token))
+      : "no token — read only, and private repos won't open";
     ghSay("Reached "+d.full_name+" ("+(d.private?"private":"PUBLIC — anyone can read it")+
       "). Default branch "+d.default_branch+". "+write+". Files go to "+ghDir()+"/");
   }catch(e){ ghSay(e.message); }
